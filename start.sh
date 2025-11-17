@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-bash build.sh && ./cmake-build-debug/dsa
+bash build.sh dsa && ./cmake-build-debug/dsa
