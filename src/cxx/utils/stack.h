@@ -31,11 +31,11 @@ typedef struct {
 #define AsI32(value) ((value).as.i32)
 #define AsPtr(value) ((value).as.ptr)
 
-Stack_t *NewStack(StackType type);
-Stack_t *NewStackWithCapacity(StackType type, size_t c);
+Stack_t *NewStack();
+Stack_t *NewStackWithCapacity(size_t c);
 void DeleteStack(Stack_t *s);
 
-int StackPush(Stack_t *s, StackValue value);
+void StackPush(Stack_t *s, StackValue value);
 StackValue StackPop(Stack_t *s);
 StackValue *StackPeek(Stack_t *s);
 

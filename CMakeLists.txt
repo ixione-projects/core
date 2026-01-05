@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
     PRIVATE
         "./src/cxx/utils/stack.cpp"
+        "./src/cxx/utils/list.cpp"
         "./src/cxx/main.cpp"
 )
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
@@ -27,6 +28,8 @@ target_sources("${PROJECT_NAME}_test"
     PRIVATE
         "./src/cxx/utils/stack.cpp"
         "./src/cxx/utils/stack_test.cpp"
+        "./src/cxx/utils/list.cpp"
+        "./src/cxx/utils/list_test.cpp"
 )
 target_include_directories("${PROJECT_NAME}_test" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
 

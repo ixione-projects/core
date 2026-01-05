@@ -3,7 +3,7 @@
 #include "stack.h"
 
 TEST(StackTest, TestStackPush) {
-    Stack_t *s = NewStack(StackI32);
+    Stack_t *s = NewStack();
 
     StackPush(s, StackValue{StackI32, {.i32 = 1}});
     StackPush(s, StackValue{StackI32, {.i32 = 2}});
@@ -11,7 +11,7 @@ TEST(StackTest, TestStackPush) {
     ASSERT_EQ(2, StackSize(s));
     DeleteStack(s);
 
-    s = NewStack(StackI32);
+    s = NewStack();
 
     StackPush(s, StackValue{StackI32, {.i32 = 3}});
     StackPush(s, StackValue{StackI32, {.i32 = 4}});
@@ -20,12 +20,12 @@ TEST(StackTest, TestStackPush) {
     ASSERT_EQ(3, StackSize(s));
     DeleteStack(s);
 
-    s = NewStack(StackI32);
+    s = NewStack();
 
     ASSERT_EQ(0, StackSize(s));
     DeleteStack(s);
 
-    s = NewStack(StackI32);
+    s = NewStack();
 
     StackPush(s, StackValue{StackI32, {.i32 = 6}});
     StackPush(s, StackValue{StackI32, {.i32 = 7}});
@@ -35,7 +35,7 @@ TEST(StackTest, TestStackPush) {
     ASSERT_EQ(4, StackSize(s));
     DeleteStack(s);
 
-    s = NewStack(StackI32);
+    s = NewStack();
 
     StackPush(s, StackValue{StackI32, {.i32 = 10}});
     StackPush(s, StackValue{StackI32, {.i32 = 11}});
