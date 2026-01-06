@@ -6,6 +6,8 @@
 
 #include "stack.h"
 
+static size_t InitialStackCapacity = 10;
+
 template <typename T> struct Stack {
   private:
     StackType t;

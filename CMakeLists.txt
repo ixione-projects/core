@@ -1,36 +1,85 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(dsa VERSION 0.0.1 LANGUAGES C CXX)
+project(core VERSION 0.0.1 LANGUAGES CXX)
+set(cmake_package_name Core CACHE INTERNAL "CMake PackageName")
+set(cmake_export_name "${cmake_package_name}Targets" CACHE INTERNAL "CMake ExportName")
 
 find_package(GTest REQUIRED CONFIG)
 include(GoogleTest) # gtest_discover_tests
 
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(${PROJECT_NAME})
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(config_file "${CMAKE_CURRENT_BINARY_DIR}/Generated/${cmake_package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
+set(config_version_file "${CMAKE_CURRENT_BINARY_DIR}/Generated/${cmake_package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
+set(cmake_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}" CACHE INTERNAL "cmake install directory")
+
+configure_package_config_file("cmake/Config.cmake.in" ${config_file} INSTALL_DESTINATION ${cmake_install_cmakedir})
+write_basic_package_version_file(${config_version_file} VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
+
+install(EXPORT ${cmake_export_name} DESTINATION  ${cmake_install_cmakedir}
+    NAMESPACE "${cmake_package_name}::"
+    COMPONENT ${PROJECT_NAME}
+)
+
+install(FILES ${config_file} ${config_version_file} DESTINATION ${cmake_install_cmakedir}
+    COMPONENT ${PROJECT_NAME}
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(cxx_default_compile_options "-Wall;-Wshadow;-Wconversion;-Wundef;-fexceptions")
+    set(cxx_scrict_compile_options "-W;-Wpointer-arith;-Wreturn-type;-Wcast-qual;-Wwrite-strings;-Wswitch;-Wunused-parameter;-Wcast-align;-Winline;-Wredundant-decls;-Wchar-subscripts")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(cxx_default_compile_options "-Wall;-Wshadow;-Wundef;-fexceptions")
+    set(cxx_scrict_compile_options "-Wextra;-Wno-unused-parameter;-Wno-missing-field-initializers")
+endif()
+
+add_library(${PROJECT_NAME} SHARED)
+add_library("${cmake_package_name}::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Binary"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Library"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Library"
+)
+
+target_compile_options(${PROJECT_NAME} PRIVATE ${cxx_default_compile_options} ${cxx_scrict_compile_options})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 target_sources(${PROJECT_NAME}
     PRIVATE
-        "./src/cxx/utils/stack.cpp"
-        "./src/cxx/utils/integral.cpp"
-        "./src/cxx/main.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/integral.cpp"
 )
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
+target_include_directories(${PROJECT_NAME} PUBLIC 
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>"
+    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT ${PROJECT_NAME}
+)
+
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${cmake_export_name}
+    COMPONENT ${PROJECT_NAME}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 enable_testing()
 
 add_executable("${PROJECT_NAME}_test")
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE GTest::gtest_main)
+target_link_libraries("${PROJECT_NAME}_test" PRIVATE GTest::gtest_main ${cmake_package_name}::${PROJECT_NAME})
+
+target_compile_options("${PROJECT_NAME}_test" PRIVATE ${cxx_default_compile_options})
+target_compile_features("${PROJECT_NAME}_test" PRIVATE cxx_std_20)
 target_sources("${PROJECT_NAME}_test"
     PRIVATE
-        "./src/cxx/utils/stack.cpp"
-        "./src/cxx/utils/stack_test.cpp"
-        "./src/cxx/utils/integral.cpp"
-        "./src/cxx/utils/integral_test.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack_test.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/integral_test.cpp"
 )
-target_include_directories("${PROJECT_NAME}_test" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
 
 gtest_discover_tests("${PROJECT_NAME}_test")

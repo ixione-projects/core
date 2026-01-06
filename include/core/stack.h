@@ -5,8 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define InitialStackCapacity 10
-
 #ifdef __cplusplus
 extern "C" {
 #endif
