@@ -1,45 +1,31 @@
 #include <gtest/gtest.h>
 
-#include "stack.h"
+#include "stack.hpp"
 
 TEST(StackTest, TestStackPush) {
-    Stack_t *s = NewStack();
+    Stack $1 = Stack<int32_t>{};
+    $1.Push(1);
+    $1.Push(2);
+    ASSERT_EQ(2, $1.Size());
 
-    StackPush(s, StackValue{StackI32, {.i32 = 1}});
-    StackPush(s, StackValue{StackI32, {.i32 = 2}});
+    Stack $2 = Stack<int32_t>{};
+    $2.Push(3);
+    $2.Push(4);
+    $2.Push(5);
+    ASSERT_EQ(3, $2.Size());
 
-    ASSERT_EQ(2, StackSize(s));
-    DeleteStack(s);
+    Stack $3 = Stack<int32_t>{};
+    ASSERT_EQ(0, $3.Size());
 
-    s = NewStack();
+    Stack $4 = Stack<int32_t>{};
+    $4.Push(6);
+    $4.Push(7);
+    $4.Push(8);
+    $4.Push(9);
+    ASSERT_EQ(4, $4.Size());
 
-    StackPush(s, StackValue{StackI32, {.i32 = 3}});
-    StackPush(s, StackValue{StackI32, {.i32 = 4}});
-    StackPush(s, StackValue{StackI32, {.i32 = 5}});
-
-    ASSERT_EQ(3, StackSize(s));
-    DeleteStack(s);
-
-    s = NewStack();
-
-    ASSERT_EQ(0, StackSize(s));
-    DeleteStack(s);
-
-    s = NewStack();
-
-    StackPush(s, StackValue{StackI32, {.i32 = 6}});
-    StackPush(s, StackValue{StackI32, {.i32 = 7}});
-    StackPush(s, StackValue{StackI32, {.i32 = 8}});
-    StackPush(s, StackValue{StackI32, {.i32 = 9}});
-
-    ASSERT_EQ(4, StackSize(s));
-    DeleteStack(s);
-
-    s = NewStack();
-
-    StackPush(s, StackValue{StackI32, {.i32 = 10}});
-    StackPush(s, StackValue{StackI32, {.i32 = 11}});
-
-    ASSERT_EQ(2, StackSize(s));
-    DeleteStack(s);
+    Stack $5 = Stack<int32_t>{};
+    $5.Push(10);
+    $5.Push(11);
+    ASSERT_EQ(2, $5.Size());
 }

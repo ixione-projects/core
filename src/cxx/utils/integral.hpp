@@ -1,10 +1,11 @@
-#ifndef LIST_HPP
-#define LIST_HPP
+#ifndef INTEGERAL_HPP
+#define INTEGERAL_HPP
 
 #include <limits>
 #include <span>
 
 #include "definitions.h"
+#include "integral.h"
 
 template <typename T>
 T Minimum(std::span<const T> array)
@@ -24,4 +25,4 @@ T Minimum(std::span<const T> array)
     return min;
 }
 
-#endif // LIST_HPP
+#endif // INTEGERAL_HPP

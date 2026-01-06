@@ -58,7 +58,7 @@ template <typename T> T *Stack<T>::Peek() const {
 template <typename T> void Stack<T>::grow() {
     delete[] this->vs;
     this->c = (this->c >> 1) + this->c;
-    this->vs = new StackValue[this->c]{};
+    this->vs = new T[this->c]{};
 }
 
 #endif // STACK_HPP

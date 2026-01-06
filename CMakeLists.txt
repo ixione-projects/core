@@ -5,7 +5,7 @@ project(dsa VERSION 0.0.1 LANGUAGES C CXX)
 find_package(GTest REQUIRED CONFIG)
 include(GoogleTest) # gtest_discover_tests
 
-set(CMAKE_C_STANDARD 20)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,8 +15,8 @@ add_executable(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
     PRIVATE
         "./src/cxx/utils/stack.cpp"
-        "./src/cxx/utils/list.cpp"
-        "./src/cxx/main.cpp"
+        "./src/cxx/utils/integral.cpp"
+        "./src/cxx/main.c"
 )
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
 
@@ -28,8 +28,8 @@ target_sources("${PROJECT_NAME}_test"
     PRIVATE
         "./src/cxx/utils/stack.cpp"
         "./src/cxx/utils/stack_test.cpp"
-        "./src/cxx/utils/list.cpp"
-        "./src/cxx/utils/list_test.cpp"
+        "./src/cxx/utils/integral.cpp"
+        "./src/cxx/utils/integral_test.cpp"
 )
 target_include_directories("${PROJECT_NAME}_test" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx")
 
