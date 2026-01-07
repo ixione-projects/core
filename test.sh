@@ -1,3 +1,3 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-bash build.sh dsa_test && ./cmake-build-debug/dsa_test
+source ./build.sh && ./build/${CMAKE_BUILD_TYPE}/core_test

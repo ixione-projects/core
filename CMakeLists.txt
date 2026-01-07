@@ -39,7 +39,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 add_library(${PROJECT_NAME})
-add_library("${cmake_package_name}::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
+add_library("${cmake_package_name}::${cmake_package_name}" ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Binary"
@@ -78,7 +78,7 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" DESTINATION "${CMAKE_INSTALL
 enable_testing()
 
 add_executable("${PROJECT_NAME}_test")
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE GTest::gtest_main ${cmake_package_name}::${PROJECT_NAME})
+target_link_libraries("${PROJECT_NAME}_test" PRIVATE GTest::gtest_main ${cmake_package_name}::${cmake_package_name})
 
 target_compile_options("${PROJECT_NAME}_test" PRIVATE ${cxx_default_compile_options})
 target_compile_features("${PROJECT_NAME}_test" PRIVATE cxx_std_20)
