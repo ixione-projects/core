@@ -1,7 +1,5 @@
-cmake-build-*/
-
-### Clion ###
-.idea/
+build/
 
 ### Clangd ###
+.clangd
 .clang-format

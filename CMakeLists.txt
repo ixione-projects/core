@@ -4,6 +4,8 @@ project(core VERSION 0.0.1 LANGUAGES CXX)
 set(cmake_package_name Core CACHE INTERNAL "CMake PackageName")
 set(cmake_export_name "${cmake_package_name}Targets" CACHE INTERNAL "CMake ExportName")
 
+option(BUILD_SHARED_LIBS "Build shared libraries (.so)" OFF)
+
 find_package(GTest REQUIRED CONFIG)
 include(GoogleTest) # gtest_discover_tests
 
@@ -12,8 +14,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-set(config_file "${CMAKE_CURRENT_BINARY_DIR}/Generated/${cmake_package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
-set(config_version_file "${CMAKE_CURRENT_BINARY_DIR}/Generated/${cmake_package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
+set(config_file "${CMAKE_CURRENT_BINARY_DIR}/generators/${cmake_package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
+set(config_version_file "${CMAKE_CURRENT_BINARY_DIR}/generators/${cmake_package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
 set(cmake_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}" CACHE INTERNAL "cmake install directory")
 
 configure_package_config_file("cmake/Config.cmake.in" ${config_file} INSTALL_DESTINATION ${cmake_install_cmakedir})
@@ -36,7 +38,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(cxx_scrict_compile_options "-Wextra;-Wno-unused-parameter;-Wno-missing-field-initializers")
 endif()
 
-add_library(${PROJECT_NAME} SHARED)
+add_library(${PROJECT_NAME})
 add_library("${cmake_package_name}::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
@@ -67,6 +69,10 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" DESTINATION "${CMAKE_INSTALL_LIBDIR}/licenses"
+    COMPONENT ${PROJECT_NAME}
 )
 
 enable_testing()
