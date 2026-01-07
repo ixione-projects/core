@@ -2,7 +2,7 @@ from typing import Any
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import get, rmdir
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.24"
@@ -56,14 +56,16 @@ class CoreConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(str(self.package_folder), "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(str(self.package_folder), "lib", "cmake"))
+        rmdir(self, os.path.join(str(self.package_folder), "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Core")
 
         self.cpp_info.set_property("cmake_target_name", "Core::core")
-        # self.cpp_info.set_property("pkg_config_name", "core")
+        self.cpp_info.set_property("pkg_config_name", "core")
         self.cpp_info.libs = ["core"]

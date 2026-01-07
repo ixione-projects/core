@@ -1,0 +1,10 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: core
+Description: Core C/C++ Library
+Version: @PROJECT_VERSION@
+URL: https://github.com/ixione-projects/core
+Requires: gtest >= 1.14.0
+Libs: -L${libdir} -lcore
+Cflags: -I${includedir}

@@ -14,12 +14,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-set(config_file "${CMAKE_CURRENT_BINARY_DIR}/generators/${cmake_package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
-set(config_version_file "${CMAKE_CURRENT_BINARY_DIR}/generators/${cmake_package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
+set(cmake_install_generatorsdir "${CMAKE_CURRENT_BINARY_DIR}/generators" CACHE INTERNAL "generated sources install directory")
 set(cmake_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}" CACHE INTERNAL "cmake install directory")
+set(cmake_install_pkgconfigdir "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE INTERNAL "pkgconfig install directory")
 
-configure_package_config_file("cmake/Config.cmake.in" ${config_file} INSTALL_DESTINATION ${cmake_install_cmakedir})
+set(config_file "${cmake_install_generatorsdir}/${cmake_package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
+set(config_version_file "${cmake_install_generatorsdir}/${cmake_package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
+set(pkgconfig_file "${cmake_install_generatorsdir}/${PROJECT_NAME}.pc" CACHE INTERNAL "<ProjectName>.pc file")
+
+configure_package_config_file("cmake/${cmake_package_name}Config.cmake.in" ${config_file} INSTALL_DESTINATION ${cmake_install_cmakedir})
 write_basic_package_version_file(${config_version_file} VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
+configure_file("cmake/${PROJECT_NAME}.pc.in" ${pkgconfig_file} @ONLY)
 
 install(EXPORT ${cmake_export_name} DESTINATION  ${cmake_install_cmakedir}
     NAMESPACE "${cmake_package_name}::"
@@ -27,6 +32,10 @@ install(EXPORT ${cmake_export_name} DESTINATION  ${cmake_install_cmakedir}
 )
 
 install(FILES ${config_file} ${config_version_file} DESTINATION ${cmake_install_cmakedir}
+    COMPONENT ${PROJECT_NAME}
+)
+
+install(FILES ${pkgconfig_file} DESTINATION ${cmake_install_pkgconfigdir}
     COMPONENT ${PROJECT_NAME}
 )
 
@@ -42,9 +51,9 @@ add_library(${PROJECT_NAME})
 add_library("${cmake_package_name}::${cmake_package_name}" ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Binary"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Library"
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Library"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE ${cxx_default_compile_options} ${cxx_scrict_compile_options})
@@ -71,9 +80,10 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" DESTINATION "${CMAKE_INSTALL_LIBDIR}/licenses"
-    COMPONENT ${PROJECT_NAME}
-)
+if(NOT TARGET uninstall)
+    configure_file("cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" @ONLY)
+    add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+endif()
 
 enable_testing()
 
