@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(core VERSION 0.0.1 LANGUAGES CXX)
+project(core VERSION 0.0.0 LANGUAGES CXX)
 set(cmake_package_name Core CACHE INTERNAL "CMake PackageName")
 set(cmake_export_name "${cmake_package_name}Targets" CACHE INTERNAL "CMake ExportName")
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.so)" OFF)
 
-find_package(GTest REQUIRED CONFIG)
+find_package(GTest REQUIRED)
 include(GoogleTest) # gtest_discover_tests
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -64,11 +64,12 @@ target_sources(${PROJECT_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/integral.cpp"
 )
 target_include_directories(${PROJECT_NAME} PUBLIC 
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/cxx/${PROJECT_NAME}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/c/" "${CMAKE_CURRENT_SOURCE_DIR}/include/cxx/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT ${PROJECT_NAME}
 )
 

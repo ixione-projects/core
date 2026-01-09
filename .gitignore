@@ -1,11 +1,10 @@
+### CMake ###
 build/
+CMakeUserPresets.json
 
 ### Clangd ###
 .clangd
 .clang-format
-
-### CMake ###
-CMakeUserPresets.json
 
 ### Python ###
 .venv

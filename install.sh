@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 
-cmake --install "./build/${CMAKE_BUILD_TYPE:="Debug"}"
+zsh build.sh && cmake --install "./build/${CMAKE_BUILD_TYPE:="Debug"}"

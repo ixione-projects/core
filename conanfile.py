@@ -14,7 +14,7 @@ class CoreConan(ConanFile):
     license = "MIT"
     author = "Treyvon Whitaker <ixione.dev@gmail.com>"
     topics = ()
-    homepage = "https://github.com/ixione-projects/core"
+    homepage = "https://github.com/ixione-projects/core#readme"
     url = ""
 
     requires = ("gtest/[^1.14]")
