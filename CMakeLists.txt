@@ -23,7 +23,21 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-function(package_install_library cmake_package_name cmake_export_name library_name shared compile_options link_libraries)
+function(package_install_library cmake_package_name cmake_export_name library_pathname shared compile_options link_libraries)
+    set(binary_path ${CMAKE_INSTALL_BINDIR})
+    set(library_path ${CMAKE_INSTALL_LIBDIR})
+
+    cmake_path(GET library_pathname FILENAME library)
+    if(NOT "${library}" STREQUAL "${library_pathname}")
+        string(LENGTH ${library_pathname} length_pathname)
+        string(LENGTH ${library} length_library)
+        math(EXPR length "${length_pathname} - (${length_library} + 1)")
+        string(SUBSTRING ${library_pathname} 0 ${length} pathname)
+        set(binary_path "${CMAKE_INSTALL_BINDIR}/${pathname}")
+        set(library_path "${CMAKE_INSTALL_LIBDIR}/${pathname}")
+    endif()
+    string(REPLACE "/" "_" target ${library_pathname})
+
     set(sources)
     set(header_dirs)
     set(headers)
@@ -50,40 +64,45 @@ function(package_install_library cmake_package_name cmake_export_name library_na
     endforeach()
     list(REMOVE_DUPLICATES header_dirs)
 
-    add_library(${library_name} ${shared} ${sources})
-    add_library(${cmake_package_name}::${library_name} ALIAS ${library_name})
+    add_library(${target} ${shared} ${sources})
+    add_library(${cmake_package_name}::${target} ALIAS ${target})
     if(link_libraries)
-        target_link_libraries(${library_name} ${link_libraries})
+        target_link_libraries(${target} ${link_libraries})
     endif()
 
-    set_target_properties(${library_name}
+    set_target_properties(${target}
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
             ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
+
+            RUNTIME_OUTPUT_NAME ${library}
+            LIBRARY_OUTPUT_NAME ${library}
+            ARCHIVE_OUTPUT_NAME ${library}
     )
-    target_compile_options(${library_name} PRIVATE ${compile_options})
-    target_compile_features(${library_name} PUBLIC cxx_std_20)
-    target_sources(${library_name}
+    target_compile_options(${target} PRIVATE ${compile_options})
+    target_compile_features(${target} PUBLIC cxx_std_20)
+    target_sources(${target}
         PUBLIC
-        FILE_SET HEADERS
+        FILE_SET ${target}_HEADERS
+        TYPE HEADERS
         BASE_DIRS
             ${header_dirs}
         FILES
             ${headers}
     )
 
-    install(TARGETS ${library_name}
+    install(TARGETS ${target}
         EXPORT ${cmake_export_name}
-        FILE_SET HEADERS DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${library_name}"
+        FILE_SET ${target}_HEADERS DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${library_pathname}"
         COMPONENT ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${binary_path}
+        ARCHIVE DESTINATION ${library_path}
+        LIBRARY DESTINATION ${library_path}
     )
-    get_target_property(interface_include_directories ${library_name} INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(interface_include_directories ${target} INTERFACE_INCLUDE_DIRECTORIES)
     list(APPEND interface_include_directories "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-    set_target_properties(${library_name}
+    set_target_properties(${target}
         PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${interface_include_directories}"
     )

@@ -12,8 +12,10 @@ description = {
 	detailed = [[
       Core is a Lua library developed to provide a common set of Lua function. 
       Core offers the following modules:
-        core.object: module to support object-oriented practices
-        core.sys:    module to access system calls
+        luacore.core:   module to support
+        luacore.loader: module to support convenient module resolution
+        luacore.object: module to support object-oriented practices
+        luacore.sys:    module to support access to system calls
    ]],
 	homepage = "https://github.com/ixione-projects/core/luacore#readme",
 	license = "MIT",
@@ -31,11 +33,11 @@ build = {
 	type = "cmake",
 	variables = {
 		BUILD_LUA = "ON",
-		CMAKE_GENERATOR = "Ninja",
+		CMAKE_INSTALL_PREFIX = "$(PREFIX)",
+		CMAKE_BUILD_TYPE = "Release",
+
 		LUA = "$(LUA)",
-		PREFIX = "$(PREFIX)",
 		LUADIR = "$(LUADIR)",
-		CMAKE_FIND_DEBUG_MODE = "ON",
 	},
 }
 

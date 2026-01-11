@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 
-rm -rf ./build/ CMakeUserPresets.json
+rm -rf CMakeUserPresets.json ./build/ ./build.luarocks/
