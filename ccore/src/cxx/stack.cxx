@@ -1,4 +1,4 @@
-#include "stack.hpp"
+#include "stack.hxx"
 
 extern "C" {
 Stack_t *NewStack() {

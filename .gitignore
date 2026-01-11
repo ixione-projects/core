@@ -8,3 +8,6 @@ CMakeUserPresets.json
 
 ### Python ###
 .venv
+
+### LuaRocks ###
+build.luarocks/

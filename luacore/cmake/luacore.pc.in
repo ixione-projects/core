@@ -1,0 +1,10 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: luacore
+Description: Core Lua Library
+Version: @PROJECT_VERSION@
+URL: https://github.com/ixione-projects/core/luacore#readme
+Requires: ccore = 0.0.0
+Libs: -L${libdir} -lluacore
+Cflags: -I${includedir}

@@ -4,7 +4,7 @@
 #include <limits>
 #include <span>
 
-#include "definitions.h"
+#include "core.h"
 #include "integral.h"
 
 template <typename T>

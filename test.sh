@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 
-source ./build.sh && ./build/${CMAKE_BUILD_TYPE}/core_test
+zsh build.sh && ./build/Debug/ccore/ccore_test

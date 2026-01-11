@@ -1,4 +1,4 @@
-#include "integral.hpp"
+#include "integral.hxx"
 
 extern "C" {
 int8_t MinimumI8(const int8_t *array, size_t size) {

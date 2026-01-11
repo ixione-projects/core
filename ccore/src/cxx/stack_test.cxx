@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "stack.hpp"
+#include "stack.hxx"
 
 TEST(StackTest, TestStackPush) {
     Stack $1 = Stack<int32_t>{};

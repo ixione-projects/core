@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
-#include "integral.hpp"
+#include "integral.hxx"
 
 TEST(MinimumTest, TestMinimum) {
     std::array<int32_t, 9> $1 = {7, 4, 3, 100, 2343243, 343434, 1, 2, 32};

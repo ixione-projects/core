@@ -1,3 +1,3 @@
 #!/usr/bin/env zsh
 
-rm -r ./build/
+rm -rf ./build/ CMakeUserPresets.json

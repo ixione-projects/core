@@ -1,27 +1,26 @@
 from typing import Any
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=2.24"
 
 class CoreConan(ConanFile):
-    name = "core"
+    name = "ccore"
 
     description = "Core C/C++ Library"
     license = "MIT"
     author = "Treyvon Whitaker <ixione.dev@gmail.com>"
     topics = ()
-    homepage = "https://github.com/ixione-projects/core#readme"
+    homepage = "https://github.com/ixione-projects/core/ccore#readme"
     url = ""
 
-    requires = ("gtest/[^1.14]")
     tool_requires = ("cmake/[>=3.28]")
 
     package_type = "library"
-    settings = ("os", "arch", "compiler", "build_type")
+    settings = ("arch", "build_type", "compiler", "os")
     options = {
         "shared": [True, False], 
         "fPIC": [True, False]
@@ -30,8 +29,6 @@ class CoreConan(ConanFile):
         "shared": False, 
         "fPIC": True
     }
-
-    generators = "CMakeToolchain"
 
     def configure(self):
         opts: Any = self.options
@@ -47,8 +44,13 @@ class CoreConan(ConanFile):
     def source(self):
         if not os.path.exists(os.path.join(str(self.source_folder), "CMakeLists.txt")):
             url = "https://github.com/ixione-projects/core/archive/refs/heads/master.zip"
-            self.output.info(f"Downloading source {url}")
+            self.output.info(f"Downloading source: {url}")
             get(self, url=url, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_C"] = True
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -64,8 +66,8 @@ class CoreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "Core")
+        self.cpp_info.set_property("cmake_file_name", "CCore")
 
-        self.cpp_info.set_property("cmake_target_name", "Core::core")
-        self.cpp_info.set_property("pkg_config_name", "core")
-        self.cpp_info.libs = ["core"]
+        self.cpp_info.set_property("cmake_target_name", "CCore::ccore")
+        self.cpp_info.set_property("pkg_config_name", "ccore")
+        self.cpp_info.libs = ["ccore"]

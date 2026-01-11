@@ -1,5 +1,5 @@
-#ifndef DEFINITIONS_H
-#define DEFINITIONS_H
+#ifndef CORE_H
+#define CORE_H
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -42,4 +42,4 @@ extern "C" {
 }
 #endif
 
-#endif // DEFINITIONS_H
+#endif // CORE_H
