@@ -1,7 +1,12 @@
 return {
 	_all = {
-		lua = "luajit",
+		ROOT = {
+			"./src/lua",
+		},
 		directory = "luacore",
 		pattern = "_test",
+
+		lua = "luajit",
+		verbose = true,
 	},
 }
