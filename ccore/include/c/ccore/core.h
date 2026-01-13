@@ -1,6 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,8 +32,18 @@ extern "C" {
 #  define AssertFunc __func__
 #endif
 
-#define Panic(msg)                                                             \
+#define Panic(fmt, ...)                                                        \
     do {                                                                       \
+        char *msg = (char *)malloc(sizeof(char));                              \
+        msg[0] = '\0';                                                         \
+        size_t length = (size_t)snprintf(NULL, 0, fmt, ##__VA_ARGS__);         \
+        if (length >= 0) {                                                     \
+            msg = (char *)realloc(msg, length + 1);                            \
+            if (msg != NULL) {                                                 \
+                snprintf(msg, length + 1, fmt, ##__VA_ARGS__);                 \
+            }                                                                  \
+        }                                                                      \
+                                                                               \
         fprintf(stderr, "Panic: '%s'\n\tat %s(%s:%d)\n", msg, AssertFunc,      \
                 AssertFile, AssertLine);                                       \
         abort();                                                               \

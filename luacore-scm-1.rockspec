@@ -12,12 +12,13 @@ description = {
 	detailed = [[
       Core is a Lua library developed to provide a common set of Lua function. 
       Core offers the following modules:
-        luacore.loader:     module to support convenient module resolution
-        luacore.env:        module to support manipulating the environment
-        luacore.types:      module to support object-oriented practices
-        luacore.types.path: module to support unix path parsing
+        luacore.loader:      module to support convenient module resolution
+        luacore.env:         module to support manipulating the environment
+        luacore.types:       module to support object-oriented practices
+        luacore.types.path:  module to support unix path parsing
+        luacore.types.stack: module to support stack operations
 
-        luacore.sys:        module to support access to system calls
+        luacore.sys:         module to support access to system calls
    ]],
 	homepage = "https://github.com/ixione-projects/core/luacore#readme",
 	license = "MIT",
@@ -28,7 +29,7 @@ dependencies = {
 }
 
 test_dependencies = {
-	"busted",
+	"busted >= 2.3",
 }
 
 build = {

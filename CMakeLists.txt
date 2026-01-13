@@ -101,6 +101,7 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
         LIBRARY DESTINATION ${library_path}
     )
     get_target_property(interface_include_directories ${target} INTERFACE_INCLUDE_DIRECTORIES)
+    # to include headers relative to the package i.e. <ccore/core.h> instead of <core.h>
     list(APPEND interface_include_directories "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
     set_target_properties(${target}
         PROPERTIES
@@ -116,7 +117,7 @@ function(package_install_descriptors package_name)
     set(${package_name}_config_file "${cmake_install_generatorsdir}/${package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
     set(${package_name}_config_version_file "${cmake_install_generatorsdir}/${package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
 
-    configure_package_config_file("cmake/${package_name}Config.cmake.in" ${${package_name}_config_file} INSTALL_DESTINATION ${${package_name}_cmake_install_cmakedir})
+    configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/${package_name}Config.cmake.in" ${${package_name}_config_file} INSTALL_DESTINATION ${${package_name}_cmake_install_cmakedir})
     write_basic_package_version_file(${${package_name}_config_version_file} VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
 
     install(EXPORT ${cmake_export_name} DESTINATION ${${package_name}_cmake_install_cmakedir}
@@ -133,7 +134,7 @@ function(package_install_descriptors package_name)
         string(SUBSTRING ${pkconfig_file_in} 0 ${length} pkgconfig_filename)
         set(pkgconfig_file "${cmake_install_generatorsdir}/${pkgconfig_filename}" CACHE INTERNAL "<ProjectName>.pc file")
 
-        configure_file("cmake/${pkconfig_file_in}" ${pkgconfig_file} @ONLY)
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/${pkconfig_file_in}" ${pkgconfig_file} @ONLY)
         install(FILES ${pkgconfig_file} DESTINATION ${cmake_install_pkgconfigdir}
             COMPONENT ${PROJECT_NAME}
         )

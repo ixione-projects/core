@@ -26,7 +26,7 @@ function core.loader.SrcLuaLoader(modname)
 	for _, path in ipairs(paths) do
 		if sys.Exists(path) then
 			local file, err = loadfile(path)
-			return file or error(("error loading module '%s' from file '%s':\n\t%s"):format(modname, path, err))
+			return file or core.Panic("error loading module '%s' from file '%s':\n\t%s", modname, path, err)
 		end
 	end
 
@@ -35,7 +35,7 @@ function core.loader.SrcLuaLoader(modname)
 		local dash = modname:find("-", 1, true)
 		local libname = dash and modname:sub(dash + 1) or modname
 		local file, err = package.loadlib(path, "luaopen_" .. libname:gsub("%.", "_"))
-		return file or error(err)
+		return file or core.Panic("error loading module '%s' from file '%s':\n\t%s", modname, path, err)
 	end
 
 	return nil
