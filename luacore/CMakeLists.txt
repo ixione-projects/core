@@ -6,11 +6,14 @@ macro(package_install_lua_library library_pathname)
     )
 
     string(REPLACE "/" "_" target ${library_pathname})
-    set_target_properties(${target}
-        PROPERTIES
-            PREFIX ""
-    )
+    if(LUA)
+        set_target_properties(${target}
+            PROPERTIES
+                PREFIX ""
+        )
+    endif()
     target_include_directories(${target} PRIVATE ${LUA_INCLUDE_DIR})
+    unset(target)
 endmacro()
 
 project(luacore VERSION 0.0.0 LANGUAGES C CXX)
@@ -34,11 +37,11 @@ else()
 endif()
 
 if(LUA)
-    install(FILES 
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/luacore/core.lua" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/luacore/loader.lua" 
-            DESTINATION "${CMAKE_INSTALL_LUADIR}/${PROJECT_NAME}"
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/lua/" DESTINATION ${CMAKE_INSTALL_LUADIR}
         COMPONENT ${PROJECT_NAME}
+        FILES_MATCHING
+            PATTERN "*.lua"
+            PATTERN "*_test.lua" EXCLUDE
     )
 else()
     package_install_descriptors(${cmake_package_name} "${PROJECT_NAME}.pc.in")

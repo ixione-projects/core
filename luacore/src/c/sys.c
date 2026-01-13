@@ -1,7 +1,6 @@
 #include <errno.h>
 #include <lauxlib.h>
 #include <limits.h>
-#include <lua.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +15,7 @@
 static void *xmalloc(lua_State *L, size_t size) {
     char *ret = (char *)malloc(size);
     if (ret == NULL) {
-        lua_pushstring(L, "malloc: failed");
+        lua_pushstring(L, strerror(errno));
         lua_error(L); // returns
     }
     return ret;
@@ -25,7 +24,7 @@ static void *xmalloc(lua_State *L, size_t size) {
 static void *xrealloc(lua_State *L, void *ptr, size_t size) {
     char *ret = (char *)realloc(ptr, size);
     if (ret == NULL) {
-        lua_pushstring(L, "realloc: failed");
+        lua_pushstring(L, strerror(errno));
         lua_error(L); // returns
     }
     return ret;
@@ -42,28 +41,31 @@ static int luacore_sys_getcwd(lua_State *L) {
         errno = 0;
     }
 
+    int n = 0;
     if (ret == NULL) {
         lua_pushnil(L);
         lua_pushstring(L, strerror(errno));
+        n = 2;
     } else {
         lua_pushstring(L, ret);
-        lua_pushnil(L);
+        n = 1;
     }
 
-    free(ret);
-    return 2;
+    free(cwd);
+    return n;
 }
 
 static int luacore_sys_exists(lua_State *L) {
     const char *name = luaL_checkstring(L, 1);
+
     if (access(name, F_OK) == 0) {
         lua_pushboolean(L, true);
-        lua_pushnil(L);
+        return 1;
     } else {
         lua_pushboolean(L, false);
         lua_pushstring(L, strerror(errno));
+        return 2;
     }
-    return 2;
 }
 
 static const luaL_Reg sys[] = {{"GetCwd", luacore_sys_getcwd},

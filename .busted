@@ -1,0 +1,7 @@
+return {
+	_all = {
+		lua = "luajit",
+		directory = "luacore",
+		pattern = "_test",
+	},
+}

@@ -1,11 +1,11 @@
-local sys = require("luacore.sys")
+local sys = require("luacore.sys") -- circular dependency with luacore
 
-local M = {}
+local loader = {}
 
-function M.SrcLuaLoader(modname)
+function loader.SrcLuaLoader(modname)
 	local cwd = sys.GetCwd()
-	if cwd:sub(cwd:len(), cwd:len()) == "/" then
-		cwd = cwd:sub(0, cwd:len() - 1)
+	if cwd:sub(#cwd) == "/" then
+		cwd = cwd:sub(1, -2)
 	end
 	local modpath = modname:gsub("%.", "/")
 
@@ -13,7 +13,7 @@ function M.SrcLuaLoader(modname)
 	for _, path in ipairs(paths) do
 		if sys.Exists(path) then
 			local file, err = loadfile(path)
-			return file or error(err)
+			return file or error(("error loading module '%s' from file '%s':\n\t%s"):format(modname, path, err))
 		end
 	end
 
@@ -28,6 +28,6 @@ function M.SrcLuaLoader(modname)
 	return nil
 end
 
-table.insert(package.loaders, 2, M.SrcLuaLoader)
+table.insert(package.loaders, 2, loader.SrcLuaLoader)
 
-return M
+return loader

@@ -12,9 +12,11 @@ description = {
 	detailed = [[
       Core is a Lua library developed to provide a common set of Lua function. 
       Core offers the following modules:
-        luacore.core:   module to support
         luacore.loader: module to support convenient module resolution
-        luacore.object: module to support object-oriented practices
+        luacore.type:   module to support object-oriented practices
+        luacore.path:   module to support unix path parsing
+        luacore.env:    module to support manipulating the environment
+
         luacore.sys:    module to support access to system calls
    ]],
 	homepage = "https://github.com/ixione-projects/core/luacore#readme",
