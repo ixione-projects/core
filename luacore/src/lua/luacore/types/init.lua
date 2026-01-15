@@ -39,10 +39,19 @@ local function super(classmeta)
 end
 
 function types.Define(typedef)
-	local methods = {}
+	local methods = setmetatable({}, {
+		__index = {
+			Type = function(self)
+				return getmetatable(self).__type
+			end,
+			IsInstanceOf = function(self, type)
+				return self:Type() == type
+			end,
+		},
+	})
 	local attributes = {}
 	for k, v in pairs(typedef) do
-		if k == "static" or k == "constructor" then
+		if k == "static" or k == "constructor" or k == "metatable" then
 			goto continue
 		end
 
@@ -58,7 +67,9 @@ function types.Define(typedef)
 	local constructor = typedef.constructor or function(...) end
 
 	local typeobject = typedef.static or {}
-	local meta = { __index = methods, __type = typeobject }
+	local meta = typedef.metatable or {}
+	meta.__index = methods
+	meta.__type = typeobject
 	setmetatable(typeobject, {
 		__call = function(_, ...)
 			local instance = setmetatable({}, meta)
@@ -105,10 +116,9 @@ function types.DefineSubType(suptype, subtypedef)
 	nparams = nparams - 1 -- receiver ('self')
 
 	setmetatable(submeta.__methods, { __index = supmeta.__methods })
-	local meta = {
-		__index = submeta.__methods,
-		__type = subtype,
-	}
+	local meta = subtypedef.metatable or {}
+	meta.__index = submeta.__methods
+	meta.__type = subtype
 	submeta.__call = function(_, ...)
 		local vargs = pack(...)
 
@@ -137,13 +147,6 @@ function types.DefineSubType(suptype, subtypedef)
 	submeta.__supertype = suptype
 
 	return subtype
-end
-
-function types.IsInstanceOf(o, type)
-	if not o then
-		return false
-	end
-	return getmetatable(o).__type == type
 end
 
 return types

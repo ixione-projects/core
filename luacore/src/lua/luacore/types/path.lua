@@ -8,12 +8,10 @@ local Stack = types.stack
 local function Normalize(path)
 	assert(type(path) == "string", "'path' must be of @type string")
 
-	local is_absolute = path:sub(1, 1) == "/"
-	if path:sub(#path) ~= "/" then
-		path = path .. "/"
-	end
+	local has_prefix = path:sub(1, 1) == "/"
 
 	local parts = Stack()
+	path = path .. "/"
 	for part in path:gmatch("[^/]*/") do
 		part = part:sub(1, -2) -- trailing '/'
 		if #part == 0 then
@@ -30,7 +28,7 @@ local function Normalize(path)
 	end
 
 	local normalized = table.concat(parts.es, "/")
-	if is_absolute then
+	if has_prefix then
 		normalized = "/" .. normalized
 	end
 	return normalized
@@ -50,10 +48,10 @@ local function Resolve(parent, child)
 		end
 	end
 
-	local ch = path:sub(1, 1)
-	if ch == "~" then
+	local prefix = path:sub(1, 1)
+	if prefix == "~" then
 		path = env.HOME .. "/" .. path
-	elseif ch ~= "/" then
+	elseif prefix ~= "/" then
 		path = env.Cwd() .. "/" .. path
 	end
 
@@ -64,6 +62,7 @@ return types.Define({
 	static = {
 		Normalize = Normalize,
 		Resolve = Resolve,
+		Canonicalize = require("luacore").canonicalize,
 	},
 
 	constructor = function(self, first, ...)
@@ -71,35 +70,68 @@ return types.Define({
 	end,
 
 	Resolve = function(self, ...)
-		self.path = Resolve(self.path)
+		local path = Resolve(self.path)
 		for i, part in ipairs({ ... }) do
 			if type(part) == "string" then
-				self.path = Resolve(self.path, part)
-			elseif types.IsInstanceOf(part, getmetatable(self).__type) then -- TODO: i would like path:IsInstanceOf(Path)
-				self.path = Resolve(self.path, part.path)
+				path = Resolve(path, part)
+			elseif part.IsInstanceOf and part:IsInstanceOf(self:Type()) then
+				path = Resolve(path, part.path)
 			else
-				core.Panic("bad argument #%i, must be of @type string | Path", i)
+				core.Panic("bad argument #%i, must be of @type Path | string", i)
 			end
 		end
+		self.path = path
 		return self
 	end,
 
+	Components = function(self)
+		if self.components then
+			return self.components
+		end
+
+		local components = {}
+		for part in self.path:gmatch("[^/]*/") do
+			part = part:sub(1, -2) -- trailing '/'
+			if #part == 0 then
+				goto continue
+			end
+
+			table.insert(components, part)
+
+			::continue::
+		end
+		self.components = components
+		return components
+	end,
+
 	Exists = function(self)
-		return sys.Exists(self.path)
+		return sys.Access(self.path)
 	end,
 
 	IsAbsolute = function(self)
 		return self.path:sub(1, 1) == "/"
 	end,
 
+	IsRelative = function(self)
+		return not self:IsAbsolute()
+	end,
+
 	metatable = {
-		__concat = function(self, other)
-			-- TODO: define a topath ?
-			assert(types.IsInstanceOf(other, getmetatable(self).__type), "'other' must be of @type Path") -- TODO: i would like path:IsInstanceOf(Path)
-			return self.path .. other.path
+		__concat = function(left, right)
+			if type(left) == "string" then
+				return left .. tostring(right)
+			end
+
+			if type(right) == "string" then
+				return left:Type()(left.path .. "/" .. right)
+			elseif right.IsInstanceOf and right:IsInstanceOf(left:Type()) then
+				return left:Type()(left.path .. "/" .. right.path)
+			else
+				core.Panic("attempt to concatenate a %s value", type(right))
+			end
 		end,
-		__len = function(self)
-			return #self.path
+		__tostring = function(self)
+			return self.path
 		end,
 	},
 })
