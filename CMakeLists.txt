@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.28)
 
 project(core-distributions)
 
-option(BUILD_C "Build the c-core subproject" OFF)
+option(BUILD_C "Build the c-core subproject" ON)
 option(BUILD_LUA "Build the lua-core subproject" OFF)
 
-option(BUILD_TEST "Build the test-suites" OFF)
+option(BUILD_GTEST "Build the gtest test-suites for the associated subproject(s)" OFF)
 
-if(BUILD_TESTS)
+if(BUILD_GTEST)
     find_package(GTest REQUIRED)
     include(GoogleTest) # gtest_discover_tests
 endif()
@@ -56,8 +56,8 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
             string(REPLACE ";" "|" source_file_exts "${source_file_exts}")
             string(REPLACE ";" "|" header_file_exts "${header_file_exts}")
             message(FATAL_ERROR 
-                "\n package_install_library called with unexpected file \"${file}\", the recognized"
-                "\n file extensions are: ${source_file_exts} or ${header_file_exts}"
+                "\n package_install_library called with unrecognized file extension in \"${file}\", "
+                "\n the recognized file extensions are: ${source_file_exts} or ${header_file_exts}"
             )
             return()
         endif()
@@ -110,7 +110,7 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
 endfunction()
 
 function(package_install_descriptors package_name)
-    set(cmake_install_generatorsdir "${CMAKE_CURRENT_BINARY_DIR}/generators" CACHE INTERNAL "generated sources install directory")
+    set(cmake_install_generatorsdir "${CMAKE_BINARY_DIR}/generators" CACHE INTERNAL "generated sources install directory")
     set(cmake_install_pkgconfigdir "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE INTERNAL "pkgconfig install directory")
     set(${package_name}_cmake_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${package_name}" CACHE INTERNAL "cmake install directory")
 
@@ -141,27 +141,26 @@ function(package_install_descriptors package_name)
     endforeach()
 endfunction()
 
-function(package_gtest_main_executable cmake_package_name compile_options link_libraries)
-    if(TARGET ${PROJECT_NAME}_test)
-        message(FATAL_ERROR "Target ${PROJECT_NAME}_test is already defined.")
-        return()
-    endif()
-
+function(package_gtest_main_executable name compile_options link_libraries)
     enable_testing()
 
-    add_executable(${PROJECT_NAME}_test ${ARGN})
-    target_link_libraries(${PROJECT_NAME}_test PRIVATE GTest::gtest_main ${link_libraries})
-    target_compile_options(${PROJECT_NAME}_test PRIVATE ${compile_options})
-    target_compile_features(${PROJECT_NAME}_test PRIVATE cxx_std_20)
+    add_executable(${name}_test ${ARGN})
+    target_link_libraries(${name}_test PRIVATE GTest::gtest_main ${link_libraries})
+    target_compile_options(${name}_test PRIVATE ${compile_options})
+    target_compile_features(${name}_test PRIVATE cxx_std_20)
 
-    gtest_discover_tests(${PROJECT_NAME}_test)
+    gtest_discover_tests(${name}_test)
 endfunction()
 
 enable_testing()
 
 set(subproject_selected OFF)
 
-if(BUILD_C)
+if(BUILD_LUA)
+    set(BUILD_C ON)
+endif()
+
+if (BUILD_C)
     set(subproject_selected ON)
     add_subdirectory(ccore)
 endif()
@@ -172,7 +171,7 @@ if(BUILD_LUA)
 endif()
 
 if(NOT subproject_selected)
-    message(FATAL_ERROR 
+    message(FATAL_ERROR
         "\n Must enable a least one subproject to build"
         "\n Run \"cmake -DBUILD_[subproject]=ON ...\""
         "\n     Where 'subproject' is one of:"

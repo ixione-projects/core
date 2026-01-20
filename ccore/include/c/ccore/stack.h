@@ -3,42 +3,34 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
+
+#include "array_list.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct Stack_t Stack_t;
-
-typedef enum { StackI32, StackPtr } StackType;
-
+typedef struct Stack Stack;
 typedef struct {
-    StackType type;
-    union {
-        int32_t i32;
-        void *ptr;
-    } as;
-} StackValue;
+    const void *(*back)(const void *stack);
+    void (*push_back)(void *stack, void *value);
+    void *(*pop_back)(void *stack);
+    size_t (*size)(const void *stack);
+    bool (*is_empty)(const void *stack);
 
-#define NULL_VALUE ((StackValue){StackPtr, {.ptr = NULL}})
+} StackVTable;
 
-#define IsI32(value) ((value).type == StackI32)
-#define IsPtr(value) ((value).type == StackPtr)
+Stack *NewStack(void *backend, StackVTable vtable);
+void DeleteStack(Stack *stack);
 
-#define AsI32(value) ((value).as.i32)
-#define AsPtr(value) ((value).as.ptr)
+const void *StackBack(const Stack *stack);
+void StackPushBack(Stack *stack, void *value);
+void *StackPopBack(Stack *stack);
 
-Stack_t *NewStack();
-Stack_t *NewStackWithCapacity(size_t c);
-void DeleteStack(Stack_t *s);
+size_t StackSize(const Stack *stack);
+bool StackIsEmpty(const Stack *stack);
 
-void StackPush(Stack_t *s, StackValue value);
-StackValue StackPop(Stack_t *s);
-StackValue *StackPeek(Stack_t *s);
-
-size_t StackSize(const Stack_t *s);
-bool StackIsEmpty(const Stack_t *s);
+Stack *NewStackFromArrayList(ArrayList *list);
 
 #ifdef __cplusplus
 }

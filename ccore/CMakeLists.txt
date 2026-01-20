@@ -11,19 +11,21 @@ package_install_descriptors(${cmake_package_name} "${PROJECT_NAME}.pc.in")
 set(cxx_compile_options ${cxx_default_compile_options} ${cxx_scrict_compile_options})
 package_install_library(${cmake_package_name} ${cmake_export_name} ${PROJECT_NAME} "" "${cxx_compile_options}" ""
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/core.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/allocator.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/array_list.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stack.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/integral.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/cxx/${PROJECT_NAME}/stack.hxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/cxx/${PROJECT_NAME}/integral.hxx"
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/core.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/allocator.c"
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/integral.cxx"
 )
 
-if(BUILD_TESTS)
+if(BUILD_GTEST)
     set(gtest_link_libraries ${cmake_package_name}::${PROJECT_NAME})
-    package_gtest_main_executable(${cmake_package_name} "${cxx_default_compile_options}" "${gtest_link_libraries}" 
+    package_gtest_main_executable(${PROJECT_NAME} "${cxx_default_compile_options}" "${gtest_link_libraries}" 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list_test.cxx"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack_test.cxx"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/integral_test.cxx"
     )
 endif()

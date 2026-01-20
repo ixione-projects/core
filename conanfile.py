@@ -30,6 +30,8 @@ class CoreConan(ConanFile):
         "fPIC": True
     }
 
+    generators = "CMakeToolchain"
+
     def configure(self):
         opts: Any = self.options
         if opts.get_safe("shared"):
@@ -46,11 +48,6 @@ class CoreConan(ConanFile):
             url = "https://github.com/ixione-projects/core/archive/refs/heads/master.zip"
             self.output.info(f"Downloading source: {url}")
             get(self, url=url, strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_C"] = True
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
