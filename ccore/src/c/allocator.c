@@ -3,7 +3,7 @@
 #include "allocator.h"
 #include "core.h"
 
-static void *general_xallocate(size_t size) {
+static void *general_allocate(size_t size) {
     void *ptr = malloc(size);
     if (ptr == NULL) {
         panic("malloc: unable to allocate %zu bytes: %m", size);
@@ -11,14 +11,14 @@ static void *general_xallocate(size_t size) {
     return ptr;
 }
 
-static void general_xdeallocate(void *ptr) {
+static void general_deallocate(void *ptr) {
     free(ptr);
 }
 
 Allocator GeneralAllocator(size_t size) {
     return (Allocator){
         .value_type_size = size,
-        .allocate = general_xallocate,
-        .deallocate = general_xdeallocate,
+        .allocate = general_allocate,
+        .deallocate = general_deallocate,
     };
 }

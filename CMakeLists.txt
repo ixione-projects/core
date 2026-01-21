@@ -156,10 +156,6 @@ enable_testing()
 
 set(subproject_selected OFF)
 
-if(BUILD_LUA)
-    set(BUILD_C ON)
-endif()
-
 if (BUILD_C)
     set(subproject_selected ON)
     add_subdirectory(ccore)

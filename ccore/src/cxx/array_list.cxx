@@ -13,8 +13,6 @@
 #define array_list_size(list) ((list)->size() / (list)->value_type_size())
 
 struct vector_container : std::vector<char, container_allocator<char>> {
-    size_t s = 0;
-
     vector_container(container_allocator<char> allocator) : std::vector<char, container_allocator<char>>(allocator) {}
 
     size_t value_type_size() const {

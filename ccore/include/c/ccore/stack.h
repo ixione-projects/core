@@ -17,10 +17,9 @@ typedef struct {
     void *(*pop_back)(void *stack);
     size_t (*size)(const void *stack);
     bool (*is_empty)(const void *stack);
-
 } StackVTable;
 
-Stack *NewStack(void *backend, StackVTable vtable);
+Stack *NewStack(void *backend, StackVTable *vtable);
 void DeleteStack(Stack *stack);
 
 const void *StackBack(const Stack *stack);

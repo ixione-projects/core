@@ -154,7 +154,6 @@ static int luacore_canonicalize(lua_State *L) {
 
         struct stat st;
         if (stat(pathbuf, &st) != 0) {
-            printf("%s\n", pathbuf);
             free(file);
             free(pathbuf);
             free(retbuf);
