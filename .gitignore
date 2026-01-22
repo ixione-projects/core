@@ -2,7 +2,7 @@
 build/
 CMakeUserPresets.json
 
-### Clangd ###
+### Clang ###
 .clangd
 .clang-format
 

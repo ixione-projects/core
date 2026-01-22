@@ -52,10 +52,10 @@ set(${PROJECT_NAME}_link_libraries PUBLIC CCore::ccore PRIVATE Lua::lua)
 
 package_install_lua_library("${PROJECT_NAME}/sys"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/sys.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/xalloc.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/l_alloc.c"
 )
 
 package_install_lua_library("${PROJECT_NAME}/canonicalize"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/canonicalize.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/xalloc.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/l_alloc.c"
 )

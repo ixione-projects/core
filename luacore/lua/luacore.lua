@@ -36,7 +36,7 @@ function core.loader.LuaLoader(modname)
 		end
 	end
 
-	local path = cwd .. "/lua" .. modpath .. ".so" -- TODO: move to seperate LibLoader
+	local path = cwd .. "/lua" .. modpath .. ".so"
 	if sys.Access(path, "rx") then
 		local dash = modname:find("-", 1, true)
 		local libname = dash and modname:sub(dash + 1) or modname

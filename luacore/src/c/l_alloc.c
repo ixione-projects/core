@@ -4,7 +4,7 @@
 
 #include "defines.h"
 
-void *xmalloc(lua_State *L, size_t size) {
+void *l_malloc(lua_State *L, size_t size) {
     char *ret = (char *)malloc(size);
     if (ret == NULL) {
         lua_pushstring(L, strerror(errno));
@@ -13,7 +13,7 @@ void *xmalloc(lua_State *L, size_t size) {
     return ret;
 }
 
-void *xrealloc(lua_State *L, void *ptr, size_t size) {
+void *l_realloc(lua_State *L, void *ptr, size_t size) {
     char *ret = (char *)realloc(ptr, size);
     if (ret == NULL) {
         lua_pushstring(L, strerror(errno));
