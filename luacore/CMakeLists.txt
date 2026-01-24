@@ -2,15 +2,12 @@ cmake_minimum_required(VERSION 3.28)
 
 macro(package_install_lua_library library_pathname)
     package_install_library(
-        ${cmake_package_name} ${cmake_export_name} "${library_pathname}" SHARED "${cxx_compile_options}" "${${PROJECT_NAME}_link_libraries}" ${ARGN}
+        target ${cmake_package_name} ${cmake_export_name} "${library_pathname}" SHARED "${cxx_compile_options}" "${${PROJECT_NAME}_link_libraries}" ${ARGN}
     )
-
-    string(REPLACE "/" "_" target ${library_pathname})
     set_target_properties(${target}
         PROPERTIES
             PREFIX ""
     )
-    unset(target)
 endmacro()
 
 project(luacore VERSION 0.0.0 LANGUAGES C CXX)

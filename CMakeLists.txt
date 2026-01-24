@@ -23,7 +23,7 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-function(package_install_library cmake_package_name cmake_export_name library_pathname shared compile_options link_libraries)
+function(package_install_library target cmake_package_name cmake_export_name library_pathname shared compile_options link_libraries)
     set(binary_path ${CMAKE_INSTALL_BINDIR})
     set(library_path ${CMAKE_INSTALL_LIBDIR})
 
@@ -51,7 +51,25 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
         elseif(${ext} IN_LIST header_file_exts)
             list(APPEND headers ${file})
             cmake_path(GET file PARENT_PATH dir)
-            list(APPEND header_dirs ${dir})
+            set(append true)
+            foreach(existing ${header_dirs})
+                cmake_path(IS_PREFIX dir ${existing} is_prefix)
+                if(${is_prefix})
+                    if(dir STREQUAL existing)
+                        set(append false)
+                    else()
+                        list(REMOVE_ITEM ${existing})
+                    endif()
+                else()
+                    cmake_path(IS_PREFIX existing ${dir} is_prefix)
+                    if(${is_prefix})
+                        set(append false)
+                    endif()
+                endif()
+            endforeach()
+            if(${append})
+                list(APPEND header_dirs ${dir})
+            endif()
         else()
             string(REPLACE ";" "|" source_file_exts "${source_file_exts}")
             string(REPLACE ";" "|" header_file_exts "${header_file_exts}")
@@ -62,7 +80,6 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
             return()
         endif()
     endforeach()
-    list(REMOVE_DUPLICATES header_dirs)
 
     add_library(${target} ${shared} ${sources})
     add_library(${cmake_package_name}::${target} ALIAS ${target})
@@ -100,13 +117,8 @@ function(package_install_library cmake_package_name cmake_export_name library_pa
         ARCHIVE DESTINATION ${library_path}
         LIBRARY DESTINATION ${library_path}
     )
-    get_target_property(interface_include_directories ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    # to include headers relative to the package i.e. <ccore/core.h> instead of <core.h>
-    list(APPEND interface_include_directories "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-    set_target_properties(${target}
-        PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${interface_include_directories}"
-    )
+
+    return(PROPAGATE target)
 endfunction()
 
 function(package_install_descriptors package_name)
@@ -147,7 +159,7 @@ function(package_gtest_main_executable name compile_options link_libraries)
     add_executable(${name}_test ${ARGN})
     target_link_libraries(${name}_test PRIVATE GTest::gtest_main ${link_libraries})
     target_compile_options(${name}_test PRIVATE ${compile_options})
-    target_compile_features(${name}_test PRIVATE cxx_std_20)
+    target_compile_features(${name}_test PRIVATE c_std_17 cxx_std_20)
 
     gtest_discover_tests(${name}_test)
 endfunction()

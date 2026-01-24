@@ -8,12 +8,14 @@ extern "C" {
 #endif
 
 typedef struct Allocator {
-    size_t value_type_size;
-    void *(*allocate)(size_t size);
-    void (*deallocate)(void *ptr);
+	size_t value_type_size;
+	size_t value_type_align;
+	void *(*allocate)(size_t size, size_t align);
+	void (*deallocate)(void *ptr);
 } Allocator;
 
 Allocator GeneralAllocator(size_t size);
+Allocator AlignedAllocator(size_t size, size_t align);
 
 #ifdef __cplusplus
 }

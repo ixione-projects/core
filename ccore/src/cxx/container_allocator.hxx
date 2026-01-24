@@ -6,24 +6,24 @@
 #include "allocator.h"
 
 template <typename T>
-struct container_allocator {
-    using value_type = T;
+struct ContainerAllocator {
+	using value_type = T;
 
-    Allocator inner;
+	Allocator inner;
 
-    explicit container_allocator(Allocator inner) : inner(inner) {}
-    template <typename U>
-    container_allocator(const container_allocator<U> &other) : inner(other.inner) {}
+	explicit ContainerAllocator(Allocator inner) : inner(inner) {}
+	template <typename U>
+	ContainerAllocator(const ContainerAllocator<U> &other) : inner(other.inner) {}
 
-    container_allocator() = delete;
+	ContainerAllocator() = delete;
 
-    T *allocate(std::size_t size) {
-        return (T *)this->inner.allocate(size * inner.value_type_size);
-    }
+	T *allocate(std::size_t size) {
+		return (T *)this->inner.allocate(size * inner.value_type_size, inner.value_type_align);
+	}
 
-    void deallocate(T *ptr, std::size_t _) {
-        this->inner.deallocate(ptr);
-    }
+	void deallocate(T *ptr, std::size_t _) {
+		this->inner.deallocate(ptr);
+	}
 };
 
 #endif // CONTAINER_ALLOCATOR

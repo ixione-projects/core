@@ -9,9 +9,10 @@ option(BUILD_SHARED_LIBS "Build shared libraries (.so)" OFF)
 package_install_descriptors(${cmake_package_name} "${PROJECT_NAME}.pc.in")
 
 set(cxx_compile_options ${cxx_default_compile_options} ${cxx_scrict_compile_options})
-package_install_library(${cmake_package_name} ${cmake_export_name} ${PROJECT_NAME} "" "${cxx_compile_options}" ""
+package_install_library(target ${cmake_package_name} ${cmake_export_name} ${PROJECT_NAME} "" "${cxx_compile_options}" ""
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/core.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/allocator.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/iterator.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/array_list.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stack.h"
 
@@ -20,6 +21,11 @@ package_install_library(${cmake_package_name} ${cmake_export_name} ${PROJECT_NAM
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
+)
+target_include_directories(${target}
+    INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/c>"
+        "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 if(BUILD_GTEST)

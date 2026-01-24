@@ -1,27 +1,27 @@
 local sys = require("luacore.sys")
 
-local core = setmetatable({ loader = {} }, {
+local core = setmetatable({}, {
 	__index = function(self, modname)
 		local ok, mod = pcall(require, "luacore." .. modname)
 		if not ok then
-			self.Panic(mod)
+			self.panic(mod)
 		end
 		self[modname] = mod
 		return mod
 	end,
 })
 
-function core.Panic(fmt, ...)
+function core.panic(fmt, ...)
 	error(fmt and fmt:format(...) or "", 2)
 end
 
-function core.Assert(expr, fmt, ...)
+function core.assert(expr, fmt, ...)
 	if not expr then
-		core.Panic(fmt, ...)
+		core.panic(fmt, ...)
 	end
 end
 
-function core.loader.LuaLoader(modname)
+core.loader = function(modname)
 	local cwd = sys.GetCwd()
 	if cwd:sub(#cwd) == "/" then
 		cwd = cwd:sub(1, -2)
@@ -47,6 +47,6 @@ function core.loader.LuaLoader(modname)
 	return nil
 end
 
-table.insert(package.loaders, 2, core.loader.LuaLoader)
+table.insert(package.loaders, 2, core.loader)
 
 return core

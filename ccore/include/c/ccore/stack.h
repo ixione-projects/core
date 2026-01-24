@@ -10,19 +10,20 @@
 extern "C" {
 #endif
 
-typedef struct Stack Stack;
 typedef struct {
-    const void *(*back)(const void *stack);
-    void (*push_back)(void *stack, void *value);
-    void *(*pop_back)(void *stack);
-    size_t (*size)(const void *stack);
-    bool (*is_empty)(const void *stack);
+	void *(*back)(const void *stack);
+	void (*push_back)(void *stack, void *value);
+	void *(*pop_back)(void *stack);
+	size_t (*size)(const void *stack);
+	bool (*is_empty)(const void *stack);
 } StackVTable;
+
+typedef struct Stack Stack;
 
 Stack *NewStack(void *backend, StackVTable *vtable);
 void DeleteStack(Stack *stack);
 
-const void *StackBack(const Stack *stack);
+void *StackBack(const Stack *stack);
 void StackPushBack(Stack *stack, void *value);
 void *StackPopBack(Stack *stack);
 
@@ -30,6 +31,8 @@ size_t StackSize(const Stack *stack);
 bool StackIsEmpty(const Stack *stack);
 
 Stack *NewStackFromArrayList(ArrayList *list);
+Stack *NewStackFromLinkedList();
+Stack *NewStackFromDeque();
 
 #ifdef __cplusplus
 }

@@ -5,14 +5,16 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <ccore/core.h>
+
 #include "defines.h"
 
 static int luacore_canonicalize(lua_State *L) {
 	size_t filelen = 0;
 	const char *input = luaL_checklstring(L, 1, &filelen);
 
-	// TODO: filebuf doesn't need to match file size exactly
-	char *file = (char *)l_malloc(L, filelen + 1);
+	size_t filesize = 1024;
+	char *file = (char *)l_malloc(L, max(filesize, filelen + 1));
 	memcpy(file, input, filelen);
 	file[filelen] = '\0';
 
@@ -53,6 +55,9 @@ static int luacore_canonicalize(lua_State *L) {
 
 	char *start = file;
 	if (filelen <= 0) {
+		free(file);
+		free(pathbuf);
+		free(retbuf);
 		lua_pushstring(L, "internal error: length of 'file' must be > 0");
 		lua_error(L); // return
 		return 0;
@@ -64,6 +69,9 @@ static int luacore_canonicalize(lua_State *L) {
 		}
 
 		if (curr - start <= 0) {
+			free(file);
+			free(pathbuf);
+			free(retbuf);
 			lua_pushstring(L, "internal error: length of file 'component' must be > 0");
 			lua_error(L); // return
 			return 0;
@@ -109,6 +117,9 @@ static int luacore_canonicalize(lua_State *L) {
 		while (n >= (ssize_t)retbufsize) {
 			retbufsize = (retbufsize << 1) + retbufsize;
 			if (retbufsize >= LONG_MAX) {
+				free(file);
+				free(pathbuf);
+				free(retbuf);
 				lua_pushstring(L, "internal error: 'retbuf' size must be <= LONG_MAX");
 				lua_error(L); // return
 				return 0;
@@ -132,7 +143,10 @@ static int luacore_canonicalize(lua_State *L) {
 				pathlen = 0;
 				if ((size_t)n != pathlen) {
 					filelen = (size_t)n + postfixlen;
-					file = (char *)l_realloc(L, file, filelen + 1);
+					if (filesize <= filelen) {
+						filesize += filelen + 1;
+						file = (char *)l_realloc(L, file, filesize);
+					}
 					memmove(file + n, curr, postfixlen);
 					file[filelen] = '\0';
 				}
@@ -142,7 +156,10 @@ static int luacore_canonicalize(lua_State *L) {
 				pathlen -= componentlen;
 				if ((size_t)n != componentlen) {
 					filelen = pathlen + (size_t)n + postfixlen + 1;
-					file = (char *)l_realloc(L, file, filelen + 1);
+					if (filesize <= filelen) {
+						filesize += filelen + 1;
+						file = (char *)l_realloc(L, file, filesize);
+					}
 					memmove(file + pathlen + n, curr, postfixlen);
 					file[filelen] = '\0';
 				}
