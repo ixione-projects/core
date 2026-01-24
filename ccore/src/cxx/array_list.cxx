@@ -18,35 +18,53 @@ struct Inner : std::vector<char, ContainerAllocator<char>> {
 	}
 
 	struct Iter {
-		Inner::iterator begin, end;
-		difference_type value_type_size;
+		size_t cursor = 0;
+		Inner *enclosing;
 
-		Iter(Inner *l) : begin(l->begin()), end(l->end()), value_type_size((difference_type)l->value_type_size()) {}
+		char *last = nullptr;
+
+		Iter(Inner *l) : enclosing(l) {}
 
 		bool has_next() const {
-			return begin != end;
+			return cursor != length(enclosing);
 		}
 
 		void *next() {
-			auto temp = begin;
-			begin += value_type_size;
-			return &*temp;
+			assert(cursor < length(enclosing), "`curosr = %d`", cursor);
+
+			return last = element(enclosing, cursor++);
+		}
+
+		void erase() {
+			assert(cursor >= 0, "`cursor = %d`", cursor);
+			assert(last != nullptr, "");
+
+			enclosing->resize(enclosing->size() - enclosing->value_type_size());
+			cursor -= 1;
+			auto n = (length(enclosing) - cursor) * enclosing->value_type_size();
+			std::memmove(last, last + enclosing->value_type_size(), n);
+			last = nullptr;
 		}
 	};
 };
 
 extern "C" {
 static bool array_list_has_next(const void *it) {
-	return ((const Inner::Iter *)it)->has_next();
+	return static_cast<const Inner::Iter *>(it)->has_next();
 }
 
 static void *array_list_next(void *it) {
-	return ((Inner::Iter *)it)->next();
+	return static_cast<Inner::Iter *>(it)->next();
+}
+
+static void array_list_erase(void *it) {
+	static_cast<Inner::Iter *>(it)->erase();
 }
 
 static IteratorVTable array_list_iterator_vtable = {
     .has_next = array_list_has_next,
     .next = array_list_next,
+    .erase = array_list_erase,
 };
 
 ArrayList *NewArrayList(Allocator allocator) {
@@ -55,6 +73,10 @@ ArrayList *NewArrayList(Allocator allocator) {
 
 void DeleteArrayList(ArrayList *list) {
 	delete reinterpret_cast<Inner *>(list);
+}
+
+Allocator ArrayListGetAllocator(const ArrayList *list) {
+	return reinterpret_cast<const Inner *>(list)->get_allocator().inner;
 }
 
 void *ArrayListAt(const ArrayList *list, size_t i) {
@@ -66,7 +88,9 @@ void *ArrayListAt(const ArrayList *list, size_t i) {
 
 void ArrayListInsert(ArrayList *list, size_t i, void *value) {
 	auto l = reinterpret_cast<Inner *>(list);
-	if (i >= l->capacity() / l->value_type_size()) {
+	assert(i >= 0 && i <= length(l), "`i = %d`", i);
+
+	if (i == l->capacity() / l->value_type_size()) {
 		l->reserve((i ? (i >> 1) + i : 10) * l->value_type_size());
 	}
 	l->resize(l->size() + l->value_type_size());
@@ -82,18 +106,27 @@ void *ArrayListRemove(ArrayList *list, size_t i) {
 	std::memcpy(result, value, l->value_type_size());
 
 	l->resize(l->size() - l->value_type_size());
-	std::memmove(value, value + l->value_type_size(), (length(l) - i) * l->value_type_size());
+	auto n = (length(l) - i) * l->value_type_size();
+	std::memmove(value, value + l->value_type_size(), n);
+
 	return result;
 }
 
 size_t ArrayListSize(const ArrayList *list) {
-	auto l = reinterpret_cast<const Inner *>(list);
-	return length(l);
+	return length(reinterpret_cast<const Inner *>(list));
 }
 
 bool ArrayListIsEmpty(const ArrayList *list) {
-	auto l = reinterpret_cast<const Inner *>(list);
-	return length(l) == 0;
+	return length(reinterpret_cast<const Inner *>(list)) == 0;
+}
+
+void ArrayListReserve(ArrayList *list, size_t capacity) {
+	auto l = reinterpret_cast<Inner *>(list);
+	l->reserve(capacity * l->value_type_size());
+}
+
+void ArrayListClear(ArrayList *list) {
+	reinterpret_cast<Inner *>(list)->clear();
 }
 
 Iterator NewArrayListIterator(ArrayList *list) {

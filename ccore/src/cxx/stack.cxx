@@ -14,53 +14,56 @@ struct StackContainer {
 	StackContainer(void *backend, StackVTable *vtable) : backend(backend), vtable(vtable) {}
 
 	reference back() {
-		return this->vtable->back(this->backend);
+		return vtable->back(backend);
 	}
 
 	const_reference back() const {
-		return this->vtable->back(this->backend);
+		return vtable->back(backend);
 	}
 
 	void push_back(const value_type &value) {
-		this->vtable->push_back(this->backend, value);
+		vtable->push_back(backend, value);
 	}
 
-	void pop_back() {
-		this->vtable->pop_back(this->backend);
+	reference pop_back() {
+		return vtable->pop_back(backend);
 	}
 
-	size_t size() const { return this->vtable->size(this->backend); }
-	bool empty() const { return this->vtable->is_empty(this->backend); }
+	size_type size() const {
+		return vtable->size(backend);
+	}
+	bool empty() const { return vtable->is_empty(backend); }
 };
 
 struct Inner : std::stack<void *, StackContainer> {
 	Inner(void *backend, StackVTable *vtable) : std::stack<void *, StackContainer>(StackContainer{backend, vtable}) {}
+
+	reference pop() {
+		return c.pop_back();
+	}
 };
 
 // array_list
 
 extern "C" {
 static void *array_list_back(const void *list) {
-	const ArrayList *l = (const ArrayList *)list;
-	return ArrayListBack(l);
+	return ArrayListBack(static_cast<const ArrayList *>(list));
 }
 
 static void array_list_push_back(void *list, void *value) {
-	ArrayList *l = (ArrayList *)list;
-	return ArrayListPushBack(l, value);
+	return ArrayListPushBack(static_cast<ArrayList *>(list), value);
 }
 
 static void *array_list_pop_back(void *list) {
-	ArrayList *l = (ArrayList *)list;
-	return ArrayListPopBack(l);
+	return ArrayListPopBack(static_cast<ArrayList *>(list));
 }
 
 static size_t array_list_size(const void *list) {
-	return ArrayListSize((const ArrayList *)list);
+	return ArrayListSize(static_cast<const ArrayList *>(list));
 }
 
 static bool array_list_is_empty(const void *list) {
-	return ArrayListIsEmpty((const ArrayList *)list);
+	return ArrayListIsEmpty(static_cast<const ArrayList *>(list));
 }
 
 static StackVTable array_list_stack_vtable = {
@@ -102,9 +105,7 @@ void *StackPopBack(Stack *stack) {
 	if (s->empty()) {
 		return nullptr;
 	}
-	auto result = s->top();
-	s->pop();
-	return result;
+	return s->pop();
 }
 
 size_t StackSize(const Stack *stack) {

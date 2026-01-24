@@ -10,6 +10,7 @@ extern "C" {
 typedef struct {
 	bool (*has_next)(const void *it);
 	void *(*next)(void *it);
+	void (*erase)(void *it);
 } IteratorVTable;
 
 typedef struct {
@@ -23,6 +24,10 @@ inline bool IteratorHasNext(const Iterator it) {
 
 inline void *IteratorNext(Iterator it) {
 	return it.vtable->next(it.handle);
+}
+
+inline void IteratorErase(Iterator it) {
+	it.vtable->erase(it.handle);
 }
 
 #ifdef __cplusplus

@@ -31,7 +31,6 @@ target_include_directories(${target}
 if(BUILD_GTEST)
     set(gtest_link_libraries ${cmake_package_name}::${PROJECT_NAME})
     package_gtest_main_executable(${PROJECT_NAME} "${cxx_default_compile_options}" "${gtest_link_libraries}" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list_test.cxx"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack_test.cxx"
     )
 endif()

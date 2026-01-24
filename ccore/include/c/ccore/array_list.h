@@ -13,12 +13,16 @@ typedef struct ArrayList ArrayList;
 ArrayList *NewArrayList(Allocator allocator);
 void DeleteArrayList(ArrayList *list);
 
+Allocator ArrayListGetAllocator(const ArrayList *list);
+
 void *ArrayListAt(const ArrayList *list, size_t i);
 void ArrayListInsert(ArrayList *list, size_t i, void *value);
 void *ArrayListRemove(ArrayList *list, size_t i);
 
 size_t ArrayListSize(const ArrayList *list);
 bool ArrayListIsEmpty(const ArrayList *list);
+void ArrayListReserve(ArrayList *list, size_t capacity);
+void ArrayListClear(ArrayList *list);
 
 #define ArrayListFront(list) ArrayListAt(list, 0)
 #define ArrayListBack(list) ArrayListAt(list, ArrayListSize(list) - 1)
