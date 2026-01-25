@@ -5,15 +5,15 @@ return types.Define({
 		self.es = {}
 	end,
 
-	Push = function(self, e)
+	PushBack = function(self, e)
 		table.insert(self.es, e)
 	end,
 
-	Pop = function(self)
+	PopBack = function(self)
 		return table.remove(self.es)
 	end,
 
-	Top = function(self)
+	Back = function(self)
 		return self.es[self:Size()]
 	end,
 

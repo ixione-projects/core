@@ -19,9 +19,9 @@ local function Normalize(path)
 		end
 
 		if part == ".." then
-			parts:Pop()
+			parts:PopBack()
 		elseif part ~= "." then
-			parts:Push(part)
+			parts:PushBack(part)
 		end
 
 		::continue::

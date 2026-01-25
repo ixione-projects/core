@@ -30,8 +30,8 @@ static int luacore_sys_getcwd(lua_State *L) {
 	return n;
 }
 
-static int8_t l_checkmode(const char *arg) {
-	int8_t mode = 0;
+static int l_checkmode(const char *arg) {
+	int mode = 0;
 	while (*arg) {
 		int bit;
 		switch (*(arg++)) {
@@ -60,7 +60,7 @@ static int luacore_sys_access(lua_State *L) {
 
 	int8_t mode = F_OK;
 	if (lua_gettop(L) > 1) {
-		luaL_argcheck(L, (bool)(mode = l_checkmode(luaL_checkstring(L, 2))), 2, "invalid mode");
+		luaL_argcheck(L, (mode = l_checkmode(luaL_checkstring(L, 2))), 2, "invalid mode");
 	}
 
 	if (access(file, mode) != 0) {
@@ -73,7 +73,7 @@ static int luacore_sys_access(lua_State *L) {
 }
 
 static const luaL_Reg sys[] = {{"GetCwd", luacore_sys_getcwd},
-							   {"Access", luacore_sys_access}};
+                               {"Access", luacore_sys_access}};
 
 LUA_EXPORT int luaopen_luacore_sys(lua_State *L) {
 	const size_t nrec = sizeof(sys) / sizeof(sys[0]);

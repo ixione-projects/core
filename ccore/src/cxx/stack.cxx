@@ -2,7 +2,7 @@
 
 #include "stack.h"
 
-struct StackContainer {
+struct Container {
 	using value_type = void *;
 	using reference = value_type;
 	using const_reference = const value_type;
@@ -11,7 +11,7 @@ struct StackContainer {
 	void *backend;
 	StackVTable *vtable;
 
-	StackContainer(void *backend, StackVTable *vtable) : backend(backend), vtable(vtable) {}
+	Container(void *backend, StackVTable *vtable) : backend(backend), vtable(vtable) {}
 
 	reference back() {
 		return vtable->back(backend);
@@ -25,8 +25,8 @@ struct StackContainer {
 		vtable->push_back(backend, value);
 	}
 
-	reference pop_back() {
-		return vtable->pop_back(backend);
+	reference pop_back(value_type &rvalue) {
+		return vtable->pop_back(backend, rvalue);
 	}
 
 	size_type size() const {
@@ -35,16 +35,17 @@ struct StackContainer {
 	bool empty() const { return vtable->is_empty(backend); }
 };
 
-struct Inner : std::stack<void *, StackContainer> {
-	Inner(void *backend, StackVTable *vtable) : std::stack<void *, StackContainer>(StackContainer{backend, vtable}) {}
+struct ArrayListInner : std::stack<void *, Container> {
+	ArrayListInner(void *backend, StackVTable *vtable) : std::stack<void *, Container>(Container{backend, vtable}) {}
 
-	reference pop() {
-		return c.pop_back();
+	reference pop(value_type &rvalue) {
+		return c.pop_back(rvalue);
 	}
 };
 
 // array_list
 
+// TODO: should move to array_list_impl
 extern "C" {
 static void *array_list_back(const void *list) {
 	return ArrayListBack(static_cast<const ArrayList *>(list));
@@ -54,8 +55,8 @@ static void array_list_push_back(void *list, void *value) {
 	return ArrayListPushBack(static_cast<ArrayList *>(list), value);
 }
 
-static void *array_list_pop_back(void *list) {
-	return ArrayListPopBack(static_cast<ArrayList *>(list));
+static void *array_list_pop_back(void *list, void *rvalue) {
+	return ArrayListPopBack(static_cast<ArrayList *>(list), rvalue);
 }
 
 static size_t array_list_size(const void *list) {
@@ -77,7 +78,7 @@ static StackVTable array_list_stack_vtable = {
 // array_list
 
 Stack *NewStack(void *backend, StackVTable *vtable) {
-	return reinterpret_cast<Stack *>(new Inner{backend, vtable});
+	return reinterpret_cast<Stack *>(new ArrayListInner{backend, vtable});
 }
 
 Stack *NewStackFromArrayList(ArrayList *list) {
@@ -85,11 +86,11 @@ Stack *NewStackFromArrayList(ArrayList *list) {
 }
 
 void DeleteStack(Stack *stack) {
-	delete reinterpret_cast<Inner *>(stack);
+	delete reinterpret_cast<ArrayListInner *>(stack);
 }
 
 void *StackBack(const Stack *stack) {
-	auto s = reinterpret_cast<const Inner *>(stack);
+	auto s = reinterpret_cast<const ArrayListInner *>(stack);
 	if (s->empty()) {
 		return nullptr;
 	}
@@ -97,22 +98,22 @@ void *StackBack(const Stack *stack) {
 }
 
 void StackPushBack(Stack *stack, void *value) {
-	reinterpret_cast<Inner *>(stack)->push(value);
+	reinterpret_cast<ArrayListInner *>(stack)->push(value);
 }
 
-void *StackPopBack(Stack *stack) {
-	auto s = reinterpret_cast<Inner *>(stack);
+void *StackPopBack(Stack *stack, void *rvalue) {
+	auto s = reinterpret_cast<ArrayListInner *>(stack);
 	if (s->empty()) {
 		return nullptr;
 	}
-	return s->pop();
+	return s->pop(rvalue);
 }
 
 size_t StackSize(const Stack *stack) {
-	return reinterpret_cast<const Inner *>(stack)->size();
+	return reinterpret_cast<const ArrayListInner *>(stack)->size();
 }
 
 bool StackIsEmpty(const Stack *stack) {
-	return reinterpret_cast<const Inner *>(stack)->empty();
+	return reinterpret_cast<const ArrayListInner *>(stack)->empty();
 }
 }

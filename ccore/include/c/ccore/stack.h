@@ -13,7 +13,7 @@ extern "C" {
 typedef struct {
 	void *(*back)(const void *stack);
 	void (*push_back)(void *stack, void *value);
-	void *(*pop_back)(void *stack);
+	void *(*pop_back)(void *stack, void *rvalue);
 	size_t (*size)(const void *stack);
 	bool (*is_empty)(const void *stack);
 } StackVTable;
@@ -25,7 +25,7 @@ void DeleteStack(Stack *stack);
 
 void *StackBack(const Stack *stack);
 void StackPushBack(Stack *stack, void *value);
-void *StackPopBack(Stack *stack);
+void *StackPopBack(Stack *stack, void *rvalue);
 
 size_t StackSize(const Stack *stack);
 bool StackIsEmpty(const Stack *stack);

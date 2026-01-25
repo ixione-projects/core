@@ -14,12 +14,14 @@ package_install_library(target ${cmake_package_name} ${cmake_export_name} ${PROJ
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/allocator.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/iterator.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/array_list.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/linked_list.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stack.h"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/core.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/allocator.c"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
 )
 target_include_directories(${target}
@@ -31,6 +33,7 @@ target_include_directories(${target}
 if(BUILD_GTEST)
     set(gtest_link_libraries ${cmake_package_name}::${PROJECT_NAME})
     package_gtest_main_executable(${PROJECT_NAME} "${cxx_default_compile_options}" "${gtest_link_libraries}" 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list_test.cxx"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack_test.cxx"
     )
 endif()

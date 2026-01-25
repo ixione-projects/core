@@ -7,15 +7,18 @@
 extern "C" {
 #endif
 
+typedef struct {
+	size_t size;
+	size_t align;
+} Layout;
+
 typedef struct Allocator {
-	size_t value_type_size;
-	size_t value_type_align;
 	void *(*allocate)(size_t size, size_t align);
 	void (*deallocate)(void *ptr);
 } Allocator;
 
-Allocator GeneralAllocator(size_t size);
-Allocator AlignedAllocator(size_t size, size_t align);
+extern Allocator GeneralAllocator;
+extern Allocator AlignedAllocator;
 
 #ifdef __cplusplus
 }

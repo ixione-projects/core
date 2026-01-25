@@ -7,17 +7,17 @@
 extern "C" {
 #endif
 
-#ifdef __cplusplus
-#  if defined(__has_builtin) && __has_builtin(__builtin_FILE)
+#if defined(__has_builtin)
+#  if __has_builtin(__builtin_FILE)
 #	define AssertFile __builtin_FILE()
+#  endif
+#  if __has_builtin(__builtin_LINE)
 #	define AssertLine __builtin_LINE()
 #  endif
 #endif
 
-#ifndef AssertFile
+#if !defined(AssertFile) || !defined(AssertLine)
 #  define AssertFile __FILE__
-#endif
-#ifndef AssertLine
 #  define AssertLine __LINE__
 #endif
 
@@ -29,7 +29,7 @@ extern "C" {
 #  define AssertFunc __func__
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__has_builtin) && __has_builtin(__builtin_expect)
 #  define likely(x) (__builtin_expect(((x) != false), true))
 #  define unlikely(x) (__builtin_expect(((x) != false), false))
 #else

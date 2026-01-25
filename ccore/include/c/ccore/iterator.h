@@ -9,7 +9,9 @@ extern "C" {
 
 typedef struct {
 	bool (*has_next)(const void *it);
+	bool (*has_previous)(const void *it);
 	void *(*next)(void *it);
+	void *(*previous)(void *it);
 	void (*erase)(void *it);
 } IteratorVTable;
 
@@ -22,8 +24,16 @@ inline bool IteratorHasNext(const Iterator it) {
 	return it.vtable->has_next(it.handle);
 }
 
+inline bool IteratorHasPrevious(const Iterator it) {
+	return it.vtable->has_previous(it.handle);
+}
+
 inline void *IteratorNext(Iterator it) {
 	return it.vtable->next(it.handle);
+}
+
+inline void *IteratorPrevious(Iterator it) {
+	return it.vtable->previous(it.handle);
 }
 
 inline void IteratorErase(Iterator it) {
