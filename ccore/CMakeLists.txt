@@ -21,6 +21,7 @@ package_install_library(target ${cmake_package_name} ${cmake_export_name} ${PROJ
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/allocator.c"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list_impl.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
 )

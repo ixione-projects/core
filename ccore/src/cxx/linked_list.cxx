@@ -7,18 +7,19 @@
 
 #define length(list) ((list)->size())
 
-struct Payload {
-	std::size_t size;
+struct LinkedListPayload {
 	std::byte payload[]; // (FAM)
 
 	struct Delete {
-		void operator()(Payload *node) const {
-			::operator delete(node);
+		Allocator *allocator;
+
+		void operator()(LinkedListPayload *node) const {
+			allocator->deallocate(node);
 		}
 	};
 };
 
-using Node = std::unique_ptr<Payload, Payload::Delete>;
+using LinkedListNode = std::unique_ptr<LinkedListPayload, LinkedListPayload::Delete>;
 
 template <typename T>
 struct LinkedListAllocator {
@@ -33,17 +34,17 @@ struct LinkedListAllocator {
 
 	LinkedListAllocator() = delete;
 
-	T *allocate(std::size_t size) {
-		return (T *)this->inner->allocate(size, layout.align);
+	T *allocate(std::size_t n) {
+		return (T *)inner->allocate(n * sizeof(T), layout.align);
 	}
 
 	void deallocate(T *ptr, std::size_t _) {
-		this->inner->deallocate(ptr);
+		inner->deallocate(ptr);
 	}
 };
 
-struct LinkedListInner : std::list<Node, LinkedListAllocator<Node>> {
-	LinkedListInner(LinkedListAllocator<Node> allocator) : std::list<Node, LinkedListAllocator<Node>>(allocator) {}
+struct LinkedListInner : std::list<LinkedListNode, LinkedListAllocator<LinkedListNode>> {
+	LinkedListInner(LinkedListAllocator<LinkedListNode> allocator) : std::list<LinkedListNode, LinkedListAllocator<LinkedListNode>>(allocator) {}
 
 	size_t value_type_size() const {
 		return get_allocator().layout.size;
@@ -97,6 +98,23 @@ inline LinkedListInner::iterator element(LinkedListInner *list, size_t i) {
 	return element;
 }
 
+inline LinkedListInner::const_iterator element(const LinkedListInner *list, size_t i) {
+	auto element = list->begin();
+	for (size_t index{}; index < i; ++index) {
+		++element;
+	}
+	return element;
+}
+
+static LinkedListPayload *make_payload(LinkedListInner *l, void *value) {
+	auto allocator = l->get_allocator();
+	auto s = l->value_type_size();
+	auto mem = allocator.inner->allocate(sizeof(LinkedListPayload) + s, alignof(LinkedListPayload));
+	auto payload = new (mem) LinkedListPayload{};
+	std::memcpy(payload->payload, value, s);
+	return payload;
+}
+
 extern "C" {
 static bool linked_list_has_next(const void *it) {
 	return static_cast<const LinkedListInner::Iter *>(it)->has_next();
@@ -127,7 +145,7 @@ static IteratorVTable linked_list_iterator_vtable = {
 };
 
 LinkedList *NewLinkedList(Layout layout, Allocator *allocator) {
-	return reinterpret_cast<LinkedList *>(new LinkedListInner{LinkedListAllocator<Node>{layout, allocator}});
+	return reinterpret_cast<LinkedList *>(new LinkedListInner{LinkedListAllocator<LinkedListNode>{layout, allocator}});
 }
 
 void DeleteLinkedList(LinkedList *list) {
@@ -139,20 +157,28 @@ Allocator *LinkedListGetAllocator(const LinkedList *list) {
 }
 
 void *LinkedListAt(const LinkedList *list, size_t i) {
+	auto l = reinterpret_cast<const LinkedListInner *>(list);
+	assert(i >= 0 && i < length(l), "`i = %d`", i);
+
+	return &(*element(l, i))->payload;
 }
 
 void LinkedListInsert(LinkedList *list, size_t i, void *value) {
 	auto l = reinterpret_cast<LinkedListInner *>(list);
 	assert(i >= 0 && i <= length(l), "`i = %d`", i);
 
-	// TODO: move this into the allocator?
-	auto mem = ::operator new(sizeof(Payload) + l->value_type_size());
-	auto payload = new (mem) Payload{l->value_type_size()};
-	std::memcpy(payload->payload, value, l->value_type_size());
-	l->insert(element(l, i), Node{payload});
+	l->insert(element(l, i), LinkedListNode{make_payload(l, value), LinkedListPayload::Delete{l->get_allocator().inner}});
 }
 
 void *LinkedListRemove(LinkedList *list, size_t i, void *rvalue) {
+	auto l = reinterpret_cast<LinkedListInner *>(list);
+	assert(i >= 0 && i < length(l), "`i = %d`", i);
+
+	auto value = element(l, i);
+	std::memcpy(rvalue, (*value)->payload, l->value_type_size());
+	l->erase(value);
+
+	return rvalue;
 }
 
 size_t LinkedListSize(const LinkedList *list) {
@@ -167,10 +193,46 @@ void LinkedListClear(LinkedList *list) {
 	reinterpret_cast<LinkedListInner *>(list)->clear();
 }
 
-Iterator NewLinkedListIterator(LinkedList *list) {
-	return {
+void *ArrayListFront(LinkedList *list) {
+	return &reinterpret_cast<LinkedListInner *>(list)->front()->payload;
+}
+
+void *ArrayListBack(LinkedList *list) {
+	return &reinterpret_cast<LinkedListInner *>(list)->back()->payload;
+}
+
+void ArrayListPushFront(LinkedList *list, void *value) {
+	auto l = reinterpret_cast<LinkedListInner *>(list);
+	l->push_front(LinkedListNode{make_payload(l, value), LinkedListPayload::Delete{l->get_allocator().inner}});
+}
+
+void ArrayListPushBack(LinkedList *list, void *value) {
+	auto l = reinterpret_cast<LinkedListInner *>(list);
+	l->push_back(LinkedListNode{make_payload(l, value), LinkedListPayload::Delete{l->get_allocator().inner}});
+}
+
+void *ArrayListPopFront(LinkedList *list, void *rvalue) {
+	auto l = reinterpret_cast<LinkedListInner *>(list);
+	std::memcpy(rvalue, l->front()->payload, l->value_type_size());
+	l->pop_front();
+	return rvalue;
+}
+
+void *ArrayListPopBack(LinkedList *list, void *rvalue) {
+	auto l = reinterpret_cast<LinkedListInner *>(list);
+	std::memcpy(rvalue, l->back()->payload, l->value_type_size());
+	l->pop_back();
+	return rvalue;
+}
+
+Iterator *NewLinkedListIterator(LinkedList *list) {
+	return new Iterator{
 	    .handle = new LinkedListInner::Iter{reinterpret_cast<LinkedListInner *>(list)},
 	    .vtable = &linked_list_iterator_vtable,
 	};
+}
+
+void DeleteLinkedListIterator(Iterator *it) {
+	delete static_cast<LinkedListInner::Iter *>(it->handle);
 }
 }

@@ -43,7 +43,7 @@ function(package_install_library target cmake_package_name cmake_export_name lib
     set(headers)
 
     set(source_file_exts ".c;.cxx")
-    set(header_file_exts ".h;.hxx")
+    set(header_file_exts ".h;.hxx;txx")
     foreach(file ${ARGN})
         cmake_path(GET file EXTENSION ext)
         if(${ext} IN_LIST source_file_exts)

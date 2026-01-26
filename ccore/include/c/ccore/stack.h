@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "array_list.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,10 +27,6 @@ void *StackPopBack(Stack *stack, void *rvalue);
 
 size_t StackSize(const Stack *stack);
 bool StackIsEmpty(const Stack *stack);
-
-Stack *NewStackFromArrayList(ArrayList *list);
-Stack *NewStackFromLinkedList();
-Stack *NewStackFromDeque();
 
 #ifdef __cplusplus
 }

@@ -3,6 +3,7 @@
 
 #include "allocator.h"
 #include "iterator.h"
+#include "stack.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +24,16 @@ size_t LinkedListSize(const LinkedList *list);
 bool LinkedListIsEmpty(const LinkedList *list);
 void LinkedListClear(LinkedList *list);
 
-Iterator NewLinkedListIterator(LinkedList *list);
+void *LinkedListFront(const LinkedList *list);
+void *LinkedListBack(const LinkedList *list);
+void LinkedListPushFront(LinkedList *list, void *value);
+void LinkedListPushBack(LinkedList *list, void *value);
+void *LinkedListPopFront(LinkedList *list, void *rvalue);
+void *LinkedListPopBack(LinkedList *list, void *rvalue);
+
+Iterator *NewLinkedListIterator(LinkedList *list);
+void DeleteLinkedListIterator(Iterator *it);
+Stack *NewStackFromLinkedList(LinkedList *list);
 
 #ifdef __cplusplus
 }

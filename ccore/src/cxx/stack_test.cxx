@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "array_list.h"
 #include "stack.h"
 
 TEST(StackTest, TestPushBack) {
@@ -97,5 +98,6 @@ TEST(StackTest, TestBackAndPopBack) {
 	ASSERT_EQ(nullptr, StackPopBack($4, rvalue));
 	DeleteStack($4);
 
+	delete (rvalue);
 	DeleteArrayList(backend);
 }

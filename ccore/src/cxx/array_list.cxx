@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <cstring>
 #include <vector>
 
@@ -9,6 +8,7 @@
 #define element(list, i) ((list)->data() + (i) * (list)->value_type_size())
 
 template <typename T>
+    requires(sizeof(T) == 1)
 struct ArrayListAllocator {
 	using value_type = T;
 
@@ -21,12 +21,12 @@ struct ArrayListAllocator {
 
 	ArrayListAllocator() = delete;
 
-	T *allocate(std::size_t size) {
-		return (T *)this->inner->allocate(size * layout.size, layout.align);
+	T *allocate(std::size_t n) {
+		return (T *)inner->allocate(n, layout.align);
 	}
 
 	void deallocate(T *ptr, std::size_t _) {
-		this->inner->deallocate(ptr);
+		inner->deallocate(ptr);
 	}
 };
 
@@ -71,9 +71,10 @@ struct ArrayListInner : std::vector<std::byte, ArrayListAllocator<std::byte>> {
 			assert(cursor >= 0, "`curosr = %d`", cursor);
 
 			auto element = element(enclosing, --cursor);
-			auto n = (length(enclosing) - cursor - 1) * enclosing->value_type_size();
-			std::memmove(element, element + enclosing->value_type_size(), n);
-			enclosing->resize(enclosing->size() - enclosing->value_type_size());
+			auto s = enclosing->value_type_size();
+			auto n = (length(enclosing) - cursor - 1) * s;
+			std::memmove(element, element + s, n);
+			enclosing->resize(enclosing->size() - s);
 		}
 	};
 };
@@ -130,27 +131,29 @@ void ArrayListInsert(ArrayList *list, size_t i, void *value) {
 	auto l = reinterpret_cast<ArrayListInner *>(list);
 	assert(i >= 0 && i <= length(l), "`i = %d`", i);
 
-	if (i == l->capacity() / l->value_type_size()) {
-		l->reserve((i ? (i >> 1) + i : 10) * l->value_type_size());
+	auto s = l->value_type_size();
+	if (i == l->capacity() / s) {
+		l->reserve((i ? (i >> 1) + i : 10) * s);
 	}
 
 	auto element = element(l, i);
-	auto n = (length(l) - i) * l->value_type_size();
-	l->resize(l->size() + l->value_type_size());
-	std::memmove(element + l->value_type_size(), element, n);
-	std::memcpy(element, value, l->value_type_size());
+	auto n = (length(l) - i) * s;
+	l->resize(l->size() + s);
+	std::memmove(element + s, element, n);
+	std::memcpy(element, value, s);
 }
 
 void *ArrayListRemove(ArrayList *list, size_t i, void *rvalue) {
 	auto l = reinterpret_cast<ArrayListInner *>(list);
 	assert(i >= 0 && i < length(l), "`i = %d`", i);
 
+	auto s = l->value_type_size();
 	auto value = element(l, i);
-	std::memcpy(rvalue, value, l->value_type_size());
+	std::memcpy(rvalue, value, s);
 
-	auto n = (length(l) - i - 1) * l->value_type_size();
-	std::memmove(value, value + l->value_type_size(), n);
-	l->resize(l->size() - l->value_type_size());
+	auto n = (length(l) - i - 1) * s;
+	std::memmove(value, value + s, n);
+	l->resize(l->size() - s);
 
 	return rvalue;
 }
@@ -172,10 +175,14 @@ void ArrayListClear(ArrayList *list) {
 	reinterpret_cast<ArrayListInner *>(list)->clear();
 }
 
-Iterator NewArrayListIterator(ArrayList *list) {
-	return {
+Iterator *NewArrayListIterator(ArrayList *list) {
+	return new Iterator{
 	    .handle = new ArrayListInner::Iter{reinterpret_cast<ArrayListInner *>(list)},
 	    .vtable = &array_list_iterator_vtable,
 	};
+}
+
+void DeleteArrayListIterator(Iterator *it) {
+	delete static_cast<ArrayListInner::Iter *>(it->handle);
 }
 }
