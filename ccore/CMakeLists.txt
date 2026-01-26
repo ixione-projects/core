@@ -16,14 +16,18 @@ package_install_library(target ${cmake_package_name} ${cmake_export_name} ${PROJ
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/array_list.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/linked_list.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stack.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/queue.h"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/core.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/allocator.c"
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/iterator.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list_impl.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list_impl.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/queue.cxx"
 )
 target_include_directories(${target}
     INTERFACE

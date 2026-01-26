@@ -7,39 +7,15 @@
 extern "C" {
 #endif
 
-typedef struct {
-	bool (*has_next)(const void *it);
-	bool (*has_previous)(const void *it);
-	void *(*next)(void *it);
-	void *(*previous)(void *it);
-	void (*erase)(void *it);
-} IteratorVTable;
+typedef struct Iterator Iterator;
 
-// TODO: make opaque handle
-typedef struct {
-	void *handle;
-	IteratorVTable *vtable;
-} Iterator;
+void DeleteIterator(Iterator *stack);
 
-inline bool IteratorHasNext(const Iterator *it) {
-	return it->vtable->has_next(it->handle);
-}
-
-inline bool IteratorHasPrevious(const Iterator *it) {
-	return it->vtable->has_previous(it->handle);
-}
-
-inline void *IteratorNext(Iterator *it) {
-	return it->vtable->next(it->handle);
-}
-
-inline void *IteratorPrevious(Iterator *it) {
-	return it->vtable->previous(it->handle);
-}
-
-inline void IteratorErase(Iterator *it) {
-	it->vtable->erase(it->handle);
-}
+bool IteratorHasNext(const Iterator *it);
+bool IteratorHasPrevious(const Iterator *it);
+void *IteratorNext(Iterator *it);
+void *IteratorPrevious(Iterator *it);
+void IteratorErase(Iterator *it);
 
 #ifdef __cplusplus
 }

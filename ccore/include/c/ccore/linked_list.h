@@ -3,6 +3,7 @@
 
 #include "allocator.h"
 #include "iterator.h"
+#include "queue.h"
 #include "stack.h"
 
 #ifdef __cplusplus
@@ -32,8 +33,8 @@ void *LinkedListPopFront(LinkedList *list, void *rvalue);
 void *LinkedListPopBack(LinkedList *list, void *rvalue);
 
 Iterator *NewLinkedListIterator(LinkedList *list);
-void DeleteLinkedListIterator(Iterator *it);
 Stack *NewStackFromLinkedList(LinkedList *list);
+Queue *NewQueueFromLinkedList(LinkedList *list);
 
 #ifdef __cplusplus
 }

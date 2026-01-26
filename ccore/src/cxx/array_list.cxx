@@ -4,6 +4,8 @@
 #include "array_list.h"
 #include "core.h"
 
+#include "iterator_internal.hxx"
+
 #define length(list) ((list)->size() / (list)->value_type_size())
 #define element(list, i) ((list)->data() + (i) * (list)->value_type_size())
 
@@ -41,33 +43,33 @@ struct ArrayListInner : std::vector<std::byte, ArrayListAllocator<std::byte>> {
 		return get_allocator().layout.align;
 	}
 
-	struct Iter {
+	struct Iter : IteratorContainer {
 		ArrayListInner *enclosing;
 		size_t cursor = 0;
 
 		Iter(ArrayListInner *enclosing) : enclosing(enclosing) {}
 
-		bool has_next() const {
+		bool has_next() const override {
 			return cursor != length(enclosing);
 		}
 
-		bool has_previous() const {
+		bool has_previous() const override {
 			return cursor != 0;
 		}
 
-		void *next() {
+		void *next() override {
 			assert(cursor < length(enclosing), "`curosr = %d`", cursor);
 
 			return element(enclosing, cursor++);
 		}
 
-		void *previous() {
+		void *previous() override {
 			assert(cursor >= 0, "`curosr = %d`", cursor);
 
 			return element(enclosing, --cursor);
 		}
 
-		void erase() {
+		void erase() override {
 			assert(cursor >= 0, "`curosr = %d`", cursor);
 
 			auto element = element(enclosing, --cursor);
@@ -80,34 +82,6 @@ struct ArrayListInner : std::vector<std::byte, ArrayListAllocator<std::byte>> {
 };
 
 extern "C" {
-static bool array_list_has_next(const void *it) {
-	return static_cast<const ArrayListInner::Iter *>(it)->has_next();
-}
-
-static bool array_list_has_previous(const void *it) {
-	return static_cast<const ArrayListInner::Iter *>(it)->has_previous();
-}
-
-static void *array_list_next(void *it) {
-	return static_cast<ArrayListInner::Iter *>(it)->next();
-}
-
-static void *array_list_previous(void *it) {
-	return static_cast<ArrayListInner::Iter *>(it)->previous();
-}
-
-static void array_list_erase(void *it) {
-	static_cast<ArrayListInner::Iter *>(it)->erase();
-}
-
-static IteratorVTable array_list_iterator_vtable = {
-    .has_next = array_list_has_next,
-    .has_previous = array_list_has_previous,
-    .next = array_list_next,
-    .previous = array_list_previous,
-    .erase = array_list_erase,
-};
-
 ArrayList *NewArrayList(Layout layout, Allocator *allocator) {
 	return reinterpret_cast<ArrayList *>(new ArrayListInner{ArrayListAllocator<std::byte>{layout, allocator}});
 }
@@ -176,13 +150,6 @@ void ArrayListClear(ArrayList *list) {
 }
 
 Iterator *NewArrayListIterator(ArrayList *list) {
-	return new Iterator{
-	    .handle = new ArrayListInner::Iter{reinterpret_cast<ArrayListInner *>(list)},
-	    .vtable = &array_list_iterator_vtable,
-	};
-}
-
-void DeleteArrayListIterator(Iterator *it) {
-	delete static_cast<ArrayListInner::Iter *>(it->handle);
+	return reinterpret_cast<Iterator *>(new ArrayListInner::Iter{reinterpret_cast<ArrayListInner *>(list)});
 }
 }

@@ -23,7 +23,7 @@ TEST(LinkedListTest, TestInsert) {
 		printf("%s -> ", *(char **)IteratorNext(it));
 	}
 	printf("\n");
-	DeleteLinkedListIterator(it);
+	DeleteIterator(it);
 
 	DeleteLinkedList(list);
 }

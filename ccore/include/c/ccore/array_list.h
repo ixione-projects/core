@@ -3,6 +3,7 @@
 
 #include "allocator.h"
 #include "iterator.h"
+#include "queue.h"
 #include "stack.h"
 
 #ifdef __cplusplus
@@ -33,8 +34,8 @@ void ArrayListClear(ArrayList *list);
 #define ArrayListPopBack(list, rvalue) ArrayListRemove(list, ArrayListSize(list) - 1, rvalue)
 
 Iterator *NewArrayListIterator(ArrayList *list);
-void DeleteArrayListIterator(Iterator *it);
 Stack *NewStackFromArrayList(ArrayList *list);
+Queue *NewQueueFromLinkedList(ArrayList *list);
 
 #ifdef __cplusplus
 }

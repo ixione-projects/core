@@ -13,10 +13,6 @@ struct StackContainer {
 
 	StackContainer(void *backend, StackVTable *vtable) : backend(backend), vtable(vtable) {}
 
-	reference back() {
-		return vtable->back(backend);
-	}
-
 	const_reference back() const {
 		return vtable->back(backend);
 	}
