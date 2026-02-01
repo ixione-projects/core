@@ -73,7 +73,7 @@ function(package_install_library target cmake_package_name cmake_export_name lib
         else()
             string(REPLACE ";" "|" source_file_exts "${source_file_exts}")
             string(REPLACE ";" "|" header_file_exts "${header_file_exts}")
-            message(FATAL_ERROR 
+            message(FATAL_ERROR
                 "\n package_install_library called with unrecognized file extension in \"${file}\", "
                 "\n the recognized file extensions are: ${source_file_exts} or ${header_file_exts}"
             )
@@ -98,7 +98,7 @@ function(package_install_library target cmake_package_name cmake_export_name lib
             ARCHIVE_OUTPUT_NAME ${library}
     )
     target_compile_options(${target} PRIVATE ${compile_options})
-    target_compile_features(${target} PUBLIC cxx_std_20)
+    target_compile_features(${target} PUBLIC c_std_17 cxx_std_20)
     target_sources(${target}
         PUBLIC
         FILE_SET ${target}_HEADERS
@@ -159,7 +159,7 @@ function(package_gtest_main_executable name compile_options link_libraries)
     add_executable(${name}_test ${ARGN})
     target_link_libraries(${name}_test PRIVATE GTest::gtest_main ${link_libraries})
     target_compile_options(${name}_test PRIVATE ${compile_options})
-    target_compile_features(${name}_test PRIVATE c_std_17 cxx_std_20)
+    target_compile_features(${name}_test PRIVATE cxx_std_20)
 
     gtest_discover_tests(${name}_test)
 endfunction()

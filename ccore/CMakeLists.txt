@@ -11,23 +11,20 @@ package_install_descriptors(${cmake_package_name} "${PROJECT_NAME}.pc.in")
 set(cxx_compile_options ${cxx_default_compile_options} ${cxx_scrict_compile_options})
 package_install_library(target ${cmake_package_name} ${cmake_export_name} ${PROJECT_NAME} "" "${cxx_compile_options}" ""
     "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/core.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/allocator.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/iterator.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/array_list.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/linked_list.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stack.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/queue.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/stringss.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/reader.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/strings/strings_reader.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/charsets.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/charsets/ascii.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/unicode.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/serialization/json.h"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/core.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/allocator.c"
-
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/iterator.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/array_list_impl.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list_impl.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/queue.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/strings.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/strings/strings_reader.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/charsets/ascii.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/serialization/json/lexer.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/serialization/json/parser.c"
 )
 target_include_directories(${target}
     INTERFACE
@@ -37,8 +34,7 @@ target_include_directories(${target}
 
 if(BUILD_GTEST)
     set(gtest_link_libraries ${cmake_package_name}::${PROJECT_NAME})
-    package_gtest_main_executable(${PROJECT_NAME} "${cxx_default_compile_options}" "${gtest_link_libraries}" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/linked_list_test.cxx"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/cxx/stack_test.cxx"
+    package_gtest_main_executable(${PROJECT_NAME} "${cxx_default_compile_options}" "${gtest_link_libraries}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/c/serialization/json/lexer_test.cxx"
     )
 endif()

@@ -7,6 +7,25 @@
 extern "C" {
 #endif
 
+#ifdef __cplusplus
+#  define export extern "C"
+#else
+#  define export extern
+#endif
+
+#define byte unsigned char
+
+#define min(l, r) ((l) < (r) ? (l) : (r))
+#define max(l, r) ((l) > (r) ? (l) : (r))
+
+#if defined(__has_builtin) && __has_builtin(__builtin_expect)
+#  define likely(x) (__builtin_expect(((x) != false), true))
+#  define unlikely(x) (__builtin_expect(((x) != false), false))
+#else
+#  define likely(x) (x)
+#  define unlikely(x) (x)
+#endif
+
 #if defined(__has_builtin)
 #  if __has_builtin(__builtin_FILE)
 #	define AssertFile __builtin_FILE()
@@ -29,22 +48,11 @@ extern "C" {
 #  define AssertFunc __func__
 #endif
 
-#if defined(__has_builtin) && __has_builtin(__builtin_expect)
-#  define likely(x) (__builtin_expect(((x) != false), true))
-#  define unlikely(x) (__builtin_expect(((x) != false), false))
-#else
-#  define likely(x) (x)
-#  define unlikely(x) (x)
-#endif
-
 // TODO: fail should also unwind and print stack information - rename to unwind
 void fail(const char *func, const char *file, unsigned int line, const char *expr, const char *fmt, ...);
 
-#define panic(fmt, ...) fail(AssertFunc, AssertFile, AssertLine, NULL, fmt, ##__VA_ARGS__)
-#define assert(expr, fmt, ...) ((unlikely(expr)) ? void(0) : fail(AssertFunc, AssertFile, AssertLine, #expr, fmt, ##__VA_ARGS__))
-
-#define min(l, r) ((l) < (r) ? (l) : (r))
-#define max(l, r) ((l) > (r) ? (l) : (r))
+#define Panic(fmt, ...) fail(AssertFunc, AssertFile, AssertLine, NULL, fmt, ##__VA_ARGS__)
+#define Assert(expr, fmt, ...) ((unlikely(expr)) ? void(0) : fail(AssertFunc, AssertFile, AssertLine, #expr, fmt, ##__VA_ARGS__))
 
 #ifdef __cplusplus
 }
