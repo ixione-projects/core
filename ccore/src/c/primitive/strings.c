@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stringss.h"
+#include "strings.h"
 
 String *NewString(const char *value, size_t size) {
 	String *s = (String *)malloc(sizeof(String));

@@ -1,33 +1,50 @@
 #ifndef INTERNAL_H
 #define INTERNAL_H
 
-#include "charsets.h"
-#include "reader.h"
+#include <stddef.h>
+
+#include "ccore/charsets.h"
+#include "ccore/reader.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// clang-format off
+#define ForEachJSONToken(op)    \
+	op(JSONTokenArrayBegin)     \
+	op(JSONTokenArrayEnd)       \
+	op(JSONTokenObjectBegin)    \
+	op(JSONTokenObjectEnd)      \
+	op(JSONTokenNameSeparator)  \
+	op(JSONTokenValueSeparator) \
+	op(JSONTokenString)         \
+	op(JSONTokenNumber)         \
+	op(JSONTokenFalse)          \
+	op(JSONTokenNull)           \
+	op(JSONTokenTrue)           \
+	op(JSONTokenError)          \
+	op(JSONTokenEOF)
+// clang-format on
+
 typedef enum {
-	/* Structural Characters */
-	JSONTokenArrayBegin,
-	JSONTokenArrayEnd,
-	JSONTokenObjectBegin,
-	JSONTokenObjectEnd,
-	JSONTokenNameSeparator,
-	JSONTokenValueSeparator,
-
-	JSONTokenString,
-	JSONTokenNumber,
-
-	/* Literal Names */
-	JSONTokenFalse,
-	JSONTokenNull,
-	JSONTokenTrue,
-
-	JSONTokenError,
-	JSONTokenEOF,
+#define Identifier(tt) tt,
+	ForEachJSONToken(Identifier)
+#undef Identifier
 } JSONTokenKind;
+
+inline const char *json_token_to_string(JSONTokenKind tt) {
+#define Stringify(tt) \
+case tt:              \
+	return #tt;
+	switch (tt) {
+		ForEachJSONToken(Stringify);
+	default:
+		return NULL;
+	}
+
+#undef Stringify
+}
 
 typedef struct {
 	Reader *reader;
@@ -38,40 +55,13 @@ typedef struct {
 
 	size_t start;
 	size_t current;
+
+	size_t position;
+	bool eof;
 } Parser;
 
-inline const char *json_token_to_string(JSONTokenKind tt) {
-	switch (tt) {
-	case JSONTokenArrayBegin:
-		return "JSONTokenArrayBegin";
-	case JSONTokenArrayEnd:
-		return "JSONTokenArrayEnd";
-	case JSONTokenObjectBegin:
-		return "JSONTokenObjectBegin";
-	case JSONTokenObjectEnd:
-		return "JSONTokenObjectEnd";
-	case JSONTokenNameSeparator:
-		return "JSONTokenNameSeparator";
-	case JSONTokenValueSeparator:
-		return "JSONTokenValueSeparator";
-	case JSONTokenString:
-		return "JSONTokenString";
-	case JSONTokenNumber:
-		return "JSONTokenNumber";
-	case JSONTokenFalse:
-		return "JSONTokenFalse";
-	case JSONTokenNull:
-		return "JSONTokenNull";
-	case JSONTokenTrue:
-		return "JSONTokenTrue";
-	case JSONTokenError:
-		return "JSONTokenError";
-	case JSONTokenEOF:
-		return "JSONTokenEOF";
-	}
-}
-
-Parser *json_new_parser(Reader *reader, Charset *charset);
+Parser *json_new_parser(Reader *reader);
+Parser *json_new_parser_with_charset(Reader *reader, Charset *charset);
 
 JSONTokenKind json_next_token(Parser *parser);
 

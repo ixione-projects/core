@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define UnicodeReplacement 0xFFFD
+#define UnicodeError 0xFFFD
 
 #ifdef __cplusplus
 }

@@ -4,12 +4,6 @@
 #include "internal.h"
 #include "unicode.h"
 
-#define EmitBasicToken(codepoint, token) \
-	case codepoint:                      \
-		result = JSONToken##token;       \
-		parser->current += length;       \
-		break
-
 static inline uint32_t json_next_codepoint(Parser *parser, unsigned int *length) {
 	return parser->charset->decode(parser->buf + parser->current, length);
 }
@@ -19,17 +13,29 @@ static bool json_is_whitespace(uint32_t ch) {
 }
 
 static inline void json_skip_whitespace(Parser *parser) {
-	uint32_t ch = UnicodeReplacement;
+	uint32_t ch = UnicodeError;
 	unsigned int length = 0;
 	while (json_is_whitespace((ch = json_next_codepoint(parser, &length)))) {
-		if (unlikely(ch == UnicodeReplacement)) {
+		if (unlikely(ch == UnicodeError)) {
 			// TODO: error
 		}
 		parser->current += length;
+		parser->position += length;
 	}
 }
 
 JSONTokenKind json_next_token(Parser *parser) {
+#define EmitBasicToken(codepoint, token) \
+	case codepoint:                      \
+		result = JSONToken##token;       \
+		parser->current += length;       \
+		parser->position += length;      \
+		break
+
+	if (parser->eof) {
+		return JSONTokenEOF;
+	}
+
 	parser->start = parser->current;
 	if (parser->start == parser->buflen) {
 		parser->start = parser->current = 0;
@@ -44,6 +50,7 @@ JSONTokenKind json_next_token(Parser *parser) {
 			free(parser->buf);
 			parser->bufsize = 0;
 			parser->buf = NULL;
+			parser->eof = true;
 			return JSONTokenEOF;
 		}
 
@@ -65,17 +72,20 @@ JSONTokenKind json_next_token(Parser *parser) {
 
 	JSONTokenKind result = JSONTokenError;
 
-	uint32_t ch = UnicodeReplacement;
+	uint32_t ch = UnicodeError;
 	unsigned int length = 0;
 	switch (ch = json_next_codepoint(parser, &length)) {
-		EmitBasicToken('[', ArrayBegin);
-		EmitBasicToken('{', ObjectBegin);
-		EmitBasicToken(']', ArrayEnd);
-		EmitBasicToken('}', ObjectEnd);
-		EmitBasicToken(':', NameSeparator);
+	case '"':
+		// TODO: parser string
+		break;
 		EmitBasicToken(',', ValueSeparator);
+		EmitBasicToken(':', NameSeparator);
+		EmitBasicToken('[', ArrayBegin);
+		EmitBasicToken(']', ArrayEnd);
+		EmitBasicToken('{', ObjectBegin);
+		EmitBasicToken('}', ObjectEnd);
 	default:
-		if (unlikely(ch == UnicodeReplacement)) {
+		if (unlikely(ch == UnicodeError)) {
 			// TODO: error
 		}
 		break;
@@ -88,4 +98,6 @@ JSONTokenKind json_next_token(Parser *parser) {
 	}
 
 	return result;
+
+#undef EmitBasicToken
 }

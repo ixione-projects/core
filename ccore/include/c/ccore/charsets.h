@@ -10,7 +10,6 @@ extern "C" {
 #endif
 
 typedef enum {
-	CharsetASCII,
 	CharsetUTF8,
 	CharsetUTF16,
 	CharsetUTF32,

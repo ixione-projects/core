@@ -4,6 +4,7 @@ project(core-distributions)
 
 option(BUILD_C "Build the c-core subproject" ON)
 option(BUILD_LUA "Build the lua-core subproject" OFF)
+option(BUILD_TOOLS "Build the tools subproject" OFF)
 
 option(BUILD_GTEST "Build the gtest test-suites for the associated subproject(s)" OFF)
 
@@ -23,152 +24,11 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-function(package_install_library target cmake_package_name cmake_export_name library_pathname shared compile_options link_libraries)
-    set(binary_path ${CMAKE_INSTALL_BINDIR})
-    set(library_path ${CMAKE_INSTALL_LIBDIR})
-
-    cmake_path(GET library_pathname FILENAME library)
-    if(NOT "${library}" STREQUAL "${library_pathname}")
-        string(LENGTH ${library_pathname} length_pathname)
-        string(LENGTH ${library} length_library)
-        math(EXPR length "${length_pathname} - (${length_library} + 1)")
-        string(SUBSTRING ${library_pathname} 0 ${length} pathname)
-        set(binary_path "${CMAKE_INSTALL_BINDIR}/${pathname}")
-        set(library_path "${CMAKE_INSTALL_LIBDIR}/${pathname}")
-    endif()
-    string(REPLACE "/" "_" target ${library_pathname})
-
-    set(sources)
-    set(header_dirs)
-    set(headers)
-
-    set(source_file_exts ".c;.cxx")
-    set(header_file_exts ".h;.hxx;txx")
-    foreach(file ${ARGN})
-        cmake_path(GET file EXTENSION ext)
-        if(${ext} IN_LIST source_file_exts)
-            list(APPEND sources ${file})
-        elseif(${ext} IN_LIST header_file_exts)
-            list(APPEND headers ${file})
-            cmake_path(GET file PARENT_PATH dir)
-            set(append true)
-            foreach(existing ${header_dirs})
-                cmake_path(IS_PREFIX dir ${existing} is_prefix)
-                if(${is_prefix})
-                    if(dir STREQUAL existing)
-                        set(append false)
-                    else()
-                        list(REMOVE_ITEM ${existing})
-                    endif()
-                else()
-                    cmake_path(IS_PREFIX existing ${dir} is_prefix)
-                    if(${is_prefix})
-                        set(append false)
-                    endif()
-                endif()
-            endforeach()
-            if(${append})
-                list(APPEND header_dirs ${dir})
-            endif()
-        else()
-            string(REPLACE ";" "|" source_file_exts "${source_file_exts}")
-            string(REPLACE ";" "|" header_file_exts "${header_file_exts}")
-            message(FATAL_ERROR
-                "\n package_install_library called with unrecognized file extension in \"${file}\", "
-                "\n the recognized file extensions are: ${source_file_exts} or ${header_file_exts}"
-            )
-            return()
-        endif()
-    endforeach()
-
-    add_library(${target} ${shared} ${sources})
-    add_library(${cmake_package_name}::${target} ALIAS ${target})
-    if(link_libraries)
-        target_link_libraries(${target} ${link_libraries})
-    endif()
-
-    set_target_properties(${target}
-        PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
-            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
-
-            RUNTIME_OUTPUT_NAME ${library}
-            LIBRARY_OUTPUT_NAME ${library}
-            ARCHIVE_OUTPUT_NAME ${library}
-    )
-    target_compile_options(${target} PRIVATE ${compile_options})
-    target_compile_features(${target} PUBLIC c_std_17 cxx_std_20)
-    target_sources(${target}
-        PUBLIC
-        FILE_SET ${target}_HEADERS
-        TYPE HEADERS
-        BASE_DIRS
-            ${header_dirs}
-        FILES
-            ${headers}
-    )
-
-    install(TARGETS ${target}
-        EXPORT ${cmake_export_name}
-        FILE_SET ${target}_HEADERS DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${library_pathname}"
-        COMPONENT ${PROJECT_NAME}
-        RUNTIME DESTINATION ${binary_path}
-        ARCHIVE DESTINATION ${library_path}
-        LIBRARY DESTINATION ${library_path}
-    )
-
-    return(PROPAGATE target)
-endfunction()
-
-function(package_install_descriptors package_name)
-    set(cmake_install_generatorsdir "${CMAKE_BINARY_DIR}/generators" CACHE INTERNAL "generated sources install directory")
-    set(cmake_install_pkgconfigdir "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE INTERNAL "pkgconfig install directory")
-    set(${package_name}_cmake_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${package_name}" CACHE INTERNAL "cmake install directory")
-
-    set(${package_name}_config_file "${cmake_install_generatorsdir}/${package_name}Config.cmake" CACHE INTERNAL "<PackageName>Config.cmake file")
-    set(${package_name}_config_version_file "${cmake_install_generatorsdir}/${package_name}ConfigVersion.cmake" CACHE INTERNAL "<PackageName>ConfigVersion.cmake file")
-
-    configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/${package_name}Config.cmake.in" ${${package_name}_config_file} INSTALL_DESTINATION ${${package_name}_cmake_install_cmakedir})
-    write_basic_package_version_file(${${package_name}_config_version_file} VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
-
-    install(EXPORT ${cmake_export_name} DESTINATION ${${package_name}_cmake_install_cmakedir}
-        NAMESPACE "${package_name}::"
-        COMPONENT ${PROJECT_NAME}
-    )
-    install(FILES ${${package_name}_config_file} ${${package_name}_config_version_file} DESTINATION ${${package_name}_cmake_install_cmakedir}
-        COMPONENT ${PROJECT_NAME}
-    )
-
-    foreach(pkconfig_file_in ${ARGN})
-        string(LENGTH ${pkconfig_file_in} length_in)
-        math(EXPR length "${length_in} - 3")
-        string(SUBSTRING ${pkconfig_file_in} 0 ${length} pkgconfig_filename)
-        set(pkgconfig_file "${cmake_install_generatorsdir}/${pkgconfig_filename}" CACHE INTERNAL "<ProjectName>.pc file")
-
-        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/${pkconfig_file_in}" ${pkgconfig_file} @ONLY)
-        install(FILES ${pkgconfig_file} DESTINATION ${cmake_install_pkgconfigdir}
-            COMPONENT ${PROJECT_NAME}
-        )
-    endforeach()
-endfunction()
-
-function(package_gtest_main_executable name compile_options link_libraries)
-    enable_testing()
-
-    add_executable(${name}_test ${ARGN})
-    target_link_libraries(${name}_test PRIVATE GTest::gtest_main ${link_libraries})
-    target_compile_options(${name}_test PRIVATE ${compile_options})
-    target_compile_features(${name}_test PRIVATE cxx_std_20)
-
-    gtest_discover_tests(${name}_test)
-endfunction()
-
 enable_testing()
 
 set(subproject_selected OFF)
 
-if (BUILD_C)
+if(BUILD_C)
     set(subproject_selected ON)
     add_subdirectory(ccore)
 endif()
@@ -178,6 +38,11 @@ if(BUILD_LUA)
     add_subdirectory(luacore)
 endif()
 
+if(BUILD_TOOLS)
+    set(subproject_selected ON)
+    add_subdirectory(tools)
+endif()
+
 if(NOT subproject_selected)
     message(FATAL_ERROR
         "\n Must enable a least one subproject to build"
@@ -185,6 +50,7 @@ if(NOT subproject_selected)
         "\n     Where 'subproject' is one of:"
         "\n         C"
         "\n         LUA"
+        "\n         TOOLS"
         "\n Example: cmake -DBUILD_C=ON ..."
     )
 endif()

@@ -1,8 +1,8 @@
 #ifndef STRINGS_READER_H
 #define STRINGS_READER_H
 
-#include "reader.h"
-#include "stringss.h"
+#include "ccore/reader.h"
+#include "ccore/strings.h"
 
 #ifdef __cplusplus
 extern "C" {
