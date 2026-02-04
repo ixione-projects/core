@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
-#include "charsets.h"
+#include "encodings.h"
 #include "internal.h"
 #include "unicode.h"
 
 static inline uint32_t json_next_codepoint(Parser *parser, unsigned int *length) {
-	return parser->charset->decode(parser->buf + parser->current, length);
+	return parser->encoding->decode(parser->buf + parser->current, length);
 }
 
 static bool json_is_whitespace(uint32_t ch) {
@@ -24,16 +24,16 @@ static inline void json_skip_whitespace(Parser *parser) {
 	}
 }
 
-JSONTokenKind json_next_token(Parser *parser) {
+JsonTokenKind json_next_token(Parser *parser) {
 #define EmitBasicToken(codepoint, token) \
 	case codepoint:                      \
-		result = JSONToken##token;       \
+		result = JsonToken##token;       \
 		parser->current += length;       \
 		parser->position += length;      \
 		break
 
 	if (parser->eof) {
-		return JSONTokenEOF;
+		return JsonTokenEOF;
 	}
 
 	parser->start = parser->current;
@@ -51,7 +51,7 @@ JSONTokenKind json_next_token(Parser *parser) {
 			parser->bufsize = 0;
 			parser->buf = NULL;
 			parser->eof = true;
-			return JSONTokenEOF;
+			return JsonTokenEOF;
 		}
 
 		if (unlikely(n < 0)) {
@@ -70,7 +70,7 @@ JSONTokenKind json_next_token(Parser *parser) {
 
 	json_skip_whitespace(parser);
 
-	JSONTokenKind result = JSONTokenError;
+	JsonTokenKind result = JsonTokenError;
 
 	uint32_t ch = UnicodeError;
 	unsigned int length = 0;
@@ -93,7 +93,7 @@ JSONTokenKind json_next_token(Parser *parser) {
 
 	json_skip_whitespace(parser);
 
-	if (unlikely(result == JSONTokenError)) {
+	if (unlikely(result == JsonTokenError)) {
 		// TODO: error
 	}
 

@@ -1,4 +1,4 @@
-#include "charsets/latin1.h"
+#include "encodings/latin1.h"
 
 static int encode(uint32_t codepoint, byte *out) {
 	out[0] = (byte)codepoint;
@@ -10,7 +10,7 @@ static uint32_t decode(const byte *bytes, unsigned int *length) {
 	return (uint32_t)bytes[0];
 }
 
-Charset Latin1Charset = {
+Encoding Latin1 = {
     .encode = encode,
     .decode = decode,
 };

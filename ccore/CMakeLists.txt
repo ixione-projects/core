@@ -37,7 +37,7 @@ add_library(${PROJECT_NAME}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/core.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/strings.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/strings/strings_reader.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/charsets/latin1.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/c/primitive/encodings/latin1.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/serialization/json/lexer.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/c/serialization/json/parser.c"
 )
@@ -68,8 +68,8 @@ target_sources(${PROJECT_NAME}
             "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/strings.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/reader.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/strings/strings_reader.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/charsets.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/charsets/latin1.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/encodings.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/encodings/latin1.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/unicode.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/c/${PROJECT_NAME}/serialization/json.h"
 )

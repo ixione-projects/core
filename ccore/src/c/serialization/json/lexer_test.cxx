@@ -6,13 +6,13 @@
 TEST(JSONLexerTest, TestNextToken) {
 	auto symbols = " [\t]\n{\r} :\t,\n";
 	auto tts = {
-	    JSONTokenArrayBegin,
-	    JSONTokenArrayEnd,
-	    JSONTokenObjectBegin,
-	    JSONTokenObjectEnd,
-	    JSONTokenNameSeparator,
-	    JSONTokenValueSeparator,
-	    JSONTokenEOF,
+	    JsonTokenArrayBegin,
+	    JsonTokenArrayEnd,
+	    JsonTokenObjectBegin,
+	    JsonTokenObjectEnd,
+	    JsonTokenNameSeparator,
+	    JsonTokenValueSeparator,
+	    JsonTokenEOF,
 	};
 	auto p = json_new_parser(NewStringReader(NewString(symbols, strlen(symbols))));
 	for (auto &tt : tts) {

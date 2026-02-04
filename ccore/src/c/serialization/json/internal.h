@@ -3,42 +3,38 @@
 
 #include <stddef.h>
 
-#include "ccore/charsets.h"
+#include "ccore/encodings.h"
 #include "ccore/reader.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // clang-format off
-#define ForEachJSONToken(op)    \
-	op(JSONTokenArrayBegin)     \
-	op(JSONTokenArrayEnd)       \
-	op(JSONTokenObjectBegin)    \
-	op(JSONTokenObjectEnd)      \
-	op(JSONTokenNameSeparator)  \
-	op(JSONTokenValueSeparator) \
-	op(JSONTokenString)         \
-	op(JSONTokenNumber)         \
-	op(JSONTokenFalse)          \
-	op(JSONTokenNull)           \
-	op(JSONTokenTrue)           \
-	op(JSONTokenError)          \
-	op(JSONTokenEOF)
+#define ForEachJsonToken(op)    \
+	op(JsonTokenArrayBegin)     \
+	op(JsonTokenArrayEnd)       \
+	op(JsonTokenObjectBegin)    \
+	op(JsonTokenObjectEnd)      \
+	op(JsonTokenNameSeparator)  \
+	op(JsonTokenValueSeparator) \
+	op(JsonTokenString)         \
+	op(JsonTokenNumber)         \
+	op(JsonTokenFalse)          \
+	op(JsonTokenNull)           \
+	op(JsonTokenTrue)           \
+	op(JsonTokenError)          \
+	op(JsonTokenEOF)
 // clang-format on
 
 typedef enum {
 #define Identifier(tt) tt,
-	ForEachJSONToken(Identifier)
+	ForEachJsonToken(Identifier)
 #undef Identifier
-} JSONTokenKind;
+} JsonTokenKind;
 
-inline const char *json_token_to_string(JSONTokenKind tt) {
+inline const char *json_token_to_string(JsonTokenKind tt) {
 #define Stringify(tt) \
 case tt:              \
 	return #tt;
 	switch (tt) {
-		ForEachJSONToken(Stringify);
+		ForEachJsonToken(Stringify);
 	default:
 		return NULL;
 	}
@@ -48,10 +44,11 @@ case tt:              \
 
 typedef struct {
 	Reader *reader;
+	Encoding *encoding;
+
 	size_t bufsize;
 	byte *buf;
 	size_t buflen;
-	Charset *charset;
 
 	size_t start;
 	size_t current;
@@ -61,12 +58,8 @@ typedef struct {
 } Parser;
 
 Parser *json_new_parser(Reader *reader);
-Parser *json_new_parser_with_charset(Reader *reader, Charset *charset);
+Parser *json_new_parser_with_encoding(Reader *reader, Encoding *encoding);
 
-JSONTokenKind json_next_token(Parser *parser);
-
-#ifdef __cplusplus
-}
-#endif
+JsonTokenKind json_next_token(Parser *parser);
 
 #endif // INTERNAL_H

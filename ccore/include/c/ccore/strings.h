@@ -3,19 +3,13 @@
 
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "core.h"
 
 typedef struct {
 	size_t size;
 	const char *value;
 } String;
 
-String *NewString(const char *value, size_t size);
-
-#ifdef __cplusplus
-}
-#endif
+export String *NewString(const char *value, size_t size);
 
 #endif // STRINGS_H

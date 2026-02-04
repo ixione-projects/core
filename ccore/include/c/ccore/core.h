@@ -4,10 +4,6 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
 #  define export extern "C"
 #else
 #  define export extern
@@ -42,8 +38,6 @@ extern "C" {
 
 #if defined(__GNUC__) || defined(__clang__)
 #  define AssertFunc __extension__ __PRETTY_FUNCTION__
-#elif defined(_MSC_VER)
-#  define AssertFunc __FUNCSIG__
 #else
 #  define AssertFunc __func__
 #endif
@@ -53,9 +47,5 @@ void fail(const char *func, const char *file, unsigned int line, const char *exp
 
 #define Panic(fmt, ...) fail(AssertFunc, AssertFile, AssertLine, NULL, fmt, ##__VA_ARGS__)
 #define Assert(expr, fmt, ...) ((unlikely(expr)) ? void(0) : fail(AssertFunc, AssertFile, AssertLine, #expr, fmt, ##__VA_ARGS__))
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // CORE_H

@@ -8,36 +8,36 @@ typedef enum {
 	Null,
 	Object,
 	Array
-} JSONKind;
+} JsonKind;
 
 typedef struct {
-} JSONString;
+} JsonString;
 
 typedef struct {
-} JSONNumber;
+} JsonNumber;
 
 typedef struct {
-} JSONBoolean;
+} JsonBoolean;
 
 typedef struct {
-} JSONNull;
+} JsonNull;
 
 typedef struct {
-} JSONObject;
+} JsonObject;
 
 typedef struct {
-} JSONArray;
+} JsonArray;
 
 typedef struct {
-	JSONKind discriminant;
+	JsonKind discriminant;
 	union {
-		JSONString string;
-		JSONNumber number;
-		JSONBoolean boolean;
-		JSONNull null;
-		JSONObject object;
-		JSONArray array;
+		JsonString string;
+		JsonNumber number;
+		JsonBoolean boolean;
+		JsonNull null;
+		JsonObject object;
+		JsonArray array;
 	} payload;
-} JSONValue;
+} JsonValue;
 
 #endif // JSON_H

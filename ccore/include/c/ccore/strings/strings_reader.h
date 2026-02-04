@@ -4,14 +4,6 @@
 #include "ccore/reader.h"
 #include "ccore/strings.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-Reader *NewStringReader(String *ref_s);
-
-#ifdef __cplusplus
-}
-#endif
+export Reader *NewStringReader(String *ref_s);
 
 #endif // STRINGS_READER_H
